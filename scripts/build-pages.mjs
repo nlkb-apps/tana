@@ -39,7 +39,7 @@ async function* loadGames(platformId) {
     return;
   }
   for (let offset = 0; ; offset += PAGE) {
-    const rows = await rpc('pages_export', { p_platform: platformId, p_limit: PAGE, p_offset: offset });
+    const rows = await rpc('pages_export', { p_platform: platformId, p_limit: PAGE, p_offset: offset, p_include_west: true });
     for (const g of rows) yield g;
     if (rows.length < PAGE) break;
   }
@@ -72,15 +72,19 @@ function names(g) {
 
 function jpRelease(g) { return g.releases.find(r => r.region === 'JP') || null; }
 function westRegions(g) { return ['NA', 'EU'].filter(r => g.releases.some(x => x.region === r)); }
+// A game released only outside Japan: its earliest release stands in for the Japanese one
+function firstRelease(g) { return [...g.releases].filter(r => r.date).sort((a, b) => String(a.date).localeCompare(String(b.date)))[0] || g.releases[0] || null; }
 
 function description(g, platform) {
   const { primary, ja } = names(g);
   const jp = jpRelease(g);
   const bits = [`${primary}${ja ? ` (${ja})` : ''} for the ${platform.name_en}`];
   if (jp?.date) bits[0] += `, released in Japan on ${fmtDate(jp.date, jp.precision)}${jp.publisher ? ` by ${jp.publisher}` : ''}`;
+  else if (g.is_west_only) { const f = firstRelease(g); if (f?.date) bits[0] += `, released in ${REGION[f.region] || f.region} on ${fmtDate(f.date, f.precision)}${f.publisher ? ` by ${f.publisher}` : ''}`; }
   bits[0] += '.';
   const west = westRegions(g);
   if (g.is_jp_only) bits.push('Never released outside Japan.');
+  else if (g.is_west_only) bits.push('Never released in Japan.');
   else if (west.length) bits.push(`Also released in ${west.map(r => REGION[r]).join(' and ')}.`);
   const code = g.variants.find(v => v.region === 'JP' && v.product_code)?.product_code;
   if (code) bits.push(`Product code ${code}.`);
@@ -146,8 +150,12 @@ function gamePage(g, platforms) {
 
   const facts = [
     ['Platform', plats.map(p => `<a href="${SITE}/platform/${p.id}/">${esc(p.name_en)}</a>`).join(', '), true],
-    ['Released in Japan', jp ? (fmtDate(jp.date, jp.precision) || 'date not recorded') : 'not recorded'],
-    ['Publisher', jp?.publisher],
+    ...(g.is_west_only
+      ? [['Released', west.map(r => `${REGION[r.region] || r.region}, ${fmtDate(r.date, r.precision) || 'date not recorded'}`).join('; ')],
+         ['Released in Japan', 'Never'],
+         ['Publisher', [...new Set(west.map(r => r.publisher).filter(Boolean))].join(', ')]]
+      : [['Released in Japan', jp ? (fmtDate(jp.date, jp.precision) || 'date not recorded') : 'not recorded'],
+         ['Publisher', jp?.publisher]]),
     ['Developer', g.developer],
     ['Genre', g.genre],
     ['Players', g.players],
@@ -156,11 +164,12 @@ function gamePage(g, platforms) {
     ['Launch price', fmtYen(g.retail_price_jpy)],
     ['Product code', codes.length ? codes.map(esc).join(', ') : null, true],
     ['JAN', jans.length ? jans.map(esc).join(', ') : null, true],
-    ['Media', jp?.format ? fmtFormat(jp.format) + (jp.format_basis === 'assumed' ? ' (assumed)' : '') : null],
+    ['Media', (jp || firstRelease(g))?.format ? fmtFormat((jp || firstRelease(g)).format) + ((jp || firstRelease(g)).format_basis === 'assumed' ? ' (assumed)' : '') : null],
   ].filter(([, v]) => v);
 
   let status;
   if (g.is_jp_only) status = `<p class="status jp-only"><span class="dot"></span>Japan only. This game was never released outside Japan on the ${esc(platform.name_en)}.</p>`;
+  else if (g.is_west_only) status = `<p class="status west-only"><span class="dot"></span>Western only. This game was never released in Japan on the ${esc(platform.name_en)}.</p>`;
   else if (west.length) status = `<p class="status west"><span class="dot"></span>Also released in ${west.map(r => REGION[r.region]).filter((v, i, a) => a.indexOf(v) === i).join(' and ')}.</p>`;
   else status = `<p class="status unknown"><span class="dot"></span>Western release not yet confirmed.</p>`;
 
@@ -189,7 +198,7 @@ function gamePage(g, platforms) {
   <div class="shelf">
     <div class="spine" aria-hidden="true"><span class="spine-title" lang="${hasJa(spineText) ? 'ja' : 'en'}">${esc(spineText)}</span><span class="spine-plat">${esc(platform.short_name)}</span></div>
     <div class="game-head">
-      <p class="crumb"><a href="${SITE}/platform/${platform.id}/">${esc(platform.name_en)}</a>${jp?.date ? `, ${esc(String(jp.date).slice(0, 4))}` : ''}</p>
+      <p class="crumb"><a href="${SITE}/platform/${platform.id}/">${esc(platform.name_en)}</a>${(jp || firstRelease(g))?.date ? `, ${esc(String((jp || firstRelease(g)).date).slice(0, 4))}` : ''}</p>
       <h1${hasJa(primary) ? ' lang="ja"' : ''}>${esc(primary)}</h1>
       ${ja ? `<p class="title-alt" lang="ja">${esc(ja)}</p>` : ''}
       ${g.title_kana ? `<p class="reading" lang="ja">${esc(g.title_kana)}</p>` : ''}
@@ -202,7 +211,7 @@ function gamePage(g, platforms) {
     ${facts.map(([k, v, raw]) => `<dt>${k}</dt><dd>${raw ? v : esc(v)}</dd>`).join('\n    ')}
   </dl>
 
-  ${west.length ? `<section><h2>Other regions</h2>${westRows}</section>` : ''}
+  ${west.length ? `<section><h2>${g.is_west_only ? 'Releases' : 'Other regions'}</h2>${westRows}</section>` : ''}
   ${editions.length ? `<section><h2>Editions and reissues</h2><ul class="editions">${editionRows}</ul></section>` : ''}
   ${g.differences.length ? `<section><h2>Regional differences</h2><ul class="diffs">${diffRows}</ul></section>` : ''}
   ${aliases.length ? `<p class="aliases">Also listed as: ${aliases.map(a => `<span${hasJa(a) ? ' lang="ja"' : ''}>${esc(a)}</span>`).join(', ')}</p>` : ''}
@@ -232,11 +241,12 @@ function gamePage(g, platforms) {
 function platformPage(p, games) {
   const canonical = `${SITE}/platform/${p.id}/`;
   const jpOnly = games.filter(g => g.is_jp_only).length;
-  const desc = `${games.length.toLocaleString('en-US')} ${p.name_en} games in the catalogue${p.first_year ? `, from ${p.first_year} to ${p.last_year || 'today'}` : ''}, filed by region. ${jpOnly.toLocaleString('en-US')} never left Japan.`;
+  const westOnly = games.filter(g => g.is_west_only).length;
+  const desc = `${games.length.toLocaleString('en-US')} ${p.name_en} games in the catalogue${p.first_year ? `, from ${p.first_year} to ${p.last_year || 'today'}` : ''}, filed by region. ${jpOnly.toLocaleString('en-US')} never left Japan${westOnly ? `, and ${westOnly.toLocaleString('en-US')} never came out there` : ''}.`;
   const rows = games.map(g => {
     const { primary, ja } = names(g);
-    const jp = jpRelease(g);
-    return `<li><a href="${SITE}/game/${g.slug}/"${hasJa(primary) ? ' lang="ja"' : ''}>${esc(primary)}</a>${ja ? ` <span class="ja" lang="ja">${esc(ja)}</span>` : ''}${jp?.date ? ` <span class="yr">${esc(String(jp.date).slice(0, 4))}</span>` : ''}${g.is_jp_only ? ' <span class="tag">Japan only</span>' : ''}</li>`;
+    const jp = jpRelease(g) || firstRelease(g);
+    return `<li><a href="${SITE}/game/${g.slug}/"${hasJa(primary) ? ' lang="ja"' : ''}>${esc(primary)}</a>${ja ? ` <span class="ja" lang="ja">${esc(ja)}</span>` : ''}${jp?.date ? ` <span class="yr">${esc(String(jp.date).slice(0, 4))}</span>` : ''}${g.is_jp_only ? ' <span class="tag">Japan only</span>' : ''}${g.is_west_only ? ' <span class="tag west">Western only</span>' : ''}</li>`;
   }).join('\n');
   const body = `
 <div class="plat-head">
