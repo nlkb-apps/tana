@@ -102,23 +102,27 @@ function layout({ title, desc, canonical, body, jsonld, platformColor }) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${esc(canonical)}">
-<meta name="theme-color" content="#F5F2FC">
+<meta property="og:image" content="${SITE}/static/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ECEBE6">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:wght@400;700&family=Shippori+Mincho+B1:wght@700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="${SITE}/static/pages.css">
 ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(/</g, '\\u003c')}</script>` : ''}
 </head>
 <body${platformColor ? ` style="--obi:${esc(platformColor)}"` : ''}>
 <header class="top">
-  <a class="brand" href="${SITE}/"><span class="brand-ja" lang="ja">棚</span> Tana</a>
+  <a class="brand" href="${SITE}/"><svg class="brand-mark" viewBox="0 0 22 24" aria-hidden="true"><rect class="s1" x="1" y="5" width="5" height="19" rx="1"/><rect class="s2" x="8.5" y="1" width="5" height="23" rx="1"/><rect class="s3" x="16" y="8" width="5" height="16" rx="1"/></svg><span class="brand-ja" lang="ja">棚</span> Tana</a>
   <a class="top-link" href="${SITE}/platform/">All platforms</a>
 </header>
 <main class="page">
 ${body}
 </main>
 <footer class="foot">
-  <p>Tana is a catalogue of games released in Japan, kept by collectors. Catalogue data is available under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, built on Japanese Wikipedia, Redump, MAME and Wikidata among other sources.</p>
+  <p>Tana catalogues physical game releases by region and edition, kept by collectors. Catalogue data is available under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, built on Wikipedia, Wikidata, Redump and MAME among other sources.</p>
   <p>© NLKB Consulting Co., Ltd. · <a href="${SITE}/#/privacy">Privacy</a></p>
 </footer>
 </body>
@@ -161,7 +165,7 @@ function gamePage(g, platforms) {
   else status = `<p class="status unknown"><span class="dot"></span>Western release not yet confirmed.</p>`;
 
   const westRows = west.map(r => `
-    <div class="rel">
+    <div class="rel" data-region="${esc(r.region)}">
       <div class="rel-region">${esc(REGION[r.region] || r.region)}</div>
       <div class="rel-body">
         <div class="rel-title"${hasJa(r.title) ? ' lang="ja"' : ''}>${esc(r.title || primary)}</div>
@@ -175,7 +179,7 @@ function gamePage(g, platforms) {
     <li class="diff">
       <div class="diff-head">${esc((d.category || 'difference').charAt(0).toUpperCase() + (d.category || 'difference').slice(1))}, ${esc(REGION[d.region] || d.region)}</div>
       <div class="diff-summary">${esc(d.summary)}</div>
-      ${d.jp_side || d.other_side ? `<dl class="diff-sides"><dt>Japan</dt><dd>${esc(d.jp_side || '—')}</dd><dt>${esc(REGION[d.region] || d.region)}</dt><dd>${esc(d.other_side || '—')}</dd></dl>` : ''}
+      ${d.jp_side || d.other_side ? `<dl class="diff-sides"><dt>Japan</dt><dd>${esc(d.jp_side || 'Not recorded')}</dd><dt>${esc(REGION[d.region] || d.region)}</dt><dd>${esc(d.other_side || 'Not recorded')}</dd></dl>` : ''}
     </li>`).join('');
 
   const aliases = (g.aliases || []).filter(a => a && a !== g.title_ja && a !== primary);
@@ -198,7 +202,7 @@ function gamePage(g, platforms) {
     ${facts.map(([k, v, raw]) => `<dt>${k}</dt><dd>${raw ? v : esc(v)}</dd>`).join('\n    ')}
   </dl>
 
-  ${west.length ? `<section><h2>Outside Japan</h2>${westRows}</section>` : ''}
+  ${west.length ? `<section><h2>Other regions</h2>${westRows}</section>` : ''}
   ${editions.length ? `<section><h2>Editions and reissues</h2><ul class="editions">${editionRows}</ul></section>` : ''}
   ${g.differences.length ? `<section><h2>Regional differences</h2><ul class="diffs">${diffRows}</ul></section>` : ''}
   ${aliases.length ? `<p class="aliases">Also listed as: ${aliases.map(a => `<span${hasJa(a) ? ' lang="ja"' : ''}>${esc(a)}</span>`).join(', ')}</p>` : ''}
@@ -222,13 +226,13 @@ function gamePage(g, platforms) {
     inLanguage: 'ja',
   };
 
-  return layout({ title: `${primary}${ja ? ` (${ja})` : ''} — ${platform.short_name} — Tana 棚`, desc, canonical, body, jsonld, platformColor: platform.color });
+  return layout({ title: `${primary}${ja ? ` (${ja})` : ''}, ${platform.short_name} | Tana 棚`, desc, canonical, body, jsonld, platformColor: platform.color });
 }
 
 function platformPage(p, games) {
   const canonical = `${SITE}/platform/${p.id}/`;
   const jpOnly = games.filter(g => g.is_jp_only).length;
-  const desc = `${games.length} ${p.name_en} games released in Japan${p.first_year ? `, ${p.first_year}–${p.last_year || 'present'}` : ''}. ${jpOnly} never left Japan.`;
+  const desc = `${games.length.toLocaleString('en-US')} ${p.name_en} games in the catalogue${p.first_year ? `, from ${p.first_year} to ${p.last_year || 'today'}` : ''}, filed by region. ${jpOnly.toLocaleString('en-US')} never left Japan.`;
   const rows = games.map(g => {
     const { primary, ja } = names(g);
     const jp = jpRelease(g);
@@ -244,8 +248,8 @@ function platformPage(p, games) {
 <ol class="index">
 ${rows}
 </ol>`;
-  return layout({ title: `${p.name_en} games released in Japan — Tana 棚`, desc, canonical, body, platformColor: p.color,
-    jsonld: { '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${p.name_en} games released in Japan`, url: canonical, numberOfItems: games.length } });
+  return layout({ title: `${p.name_en} games by region and edition | Tana 棚`, desc, canonical, body, platformColor: p.color,
+    jsonld: { '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${p.name_en} games by region and edition`, url: canonical, numberOfItems: games.length } });
 }
 
 function platformsIndex(platforms) {
@@ -256,10 +260,10 @@ function platformsIndex(platforms) {
   const body = `
 <div class="plat-head">
   <h1>Every platform</h1>
-  <p class="lede">${total.toLocaleString('en-US')} games released in Japan, across ${platforms.length} platforms.</p>
+  <p class="lede">${total.toLocaleString('en-US')} games across ${platforms.length} platforms, filed by region and edition.</p>
 </div>
 ${[...groups].map(([maker, ps]) => `<section><h2>${esc(maker)}</h2><ul class="plats">${ps.map(p => `<li><a href="${SITE}/platform/${p.id}/">${esc(p.name_en)}</a> <span class="ja" lang="ja">${esc(p.name_ja)}</span> <span class="yr">${p.games.toLocaleString('en-US')} games</span></li>`).join('')}</ul></section>`).join('\n')}`;
-  return layout({ title: 'Platforms — Tana 棚', desc: `${total.toLocaleString('en-US')} games released in Japan, across ${platforms.length} platforms.`, canonical, body });
+  return layout({ title: 'Every platform | Tana 棚', desc: `${total.toLocaleString('en-US')} games across ${platforms.length} platforms, filed by region and edition.`, canonical, body });
 }
 
 // ---------- build ----------
