@@ -64,6 +64,7 @@ a:focus-visible, .btn:focus-visible { outline: 3px solid var(--ring); outline-of
 .status.jp-only { color: var(--r-jp); }
 .status.west { color: var(--r-na); }
 .status.west-only { color: var(--r-na); border-style: double; border-width: 3px; }
+.status.west-phys { color: var(--r-na); }
 .status.unknown { color: var(--muted); border-style: dashed; }
 
 .facts { margin: 26px 0 0; display: grid; grid-template-columns: auto 1fr; font-size: 14px; border-top: 1.5px solid var(--ink); }
