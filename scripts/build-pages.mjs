@@ -85,6 +85,7 @@ function description(g, platform) {
   const west = westRegions(g);
   if (g.is_jp_only) bits.push('Never released outside Japan.');
   else if (g.is_west_only) bits.push('Never released in Japan.');
+  else if (g.is_west_physical_only) bits.push('Japan received it as a download only; the physical release is Western.');
   else if (west.length) bits.push(`Also released in ${west.map(r => REGION[r]).join(' and ')}.`);
   const code = g.variants.find(v => v.region === 'JP' && v.product_code)?.product_code;
   if (code) bits.push(`Product code ${code}.`);
@@ -154,7 +155,7 @@ function gamePage(g, platforms) {
       ? [['Released', west.map(r => `${REGION[r.region] || r.region}, ${fmtDate(r.date, r.precision) || 'date not recorded'}`).join('; ')],
          ['Released in Japan', 'Never'],
          ['Publisher', [...new Set(west.map(r => r.publisher).filter(Boolean))].join(', ')]]
-      : [['Released in Japan', jp ? (fmtDate(jp.date, jp.precision) || 'date not recorded') : 'not recorded'],
+      : [['Released in Japan', jp ? (fmtDate(jp.date, jp.precision) || 'date not recorded') + (jp.format === 'digital' ? ', download only' : '') : 'not recorded'],
          ['Publisher', jp?.publisher]]),
     ['Developer', g.developer],
     ['Genre', g.genre],
@@ -170,6 +171,7 @@ function gamePage(g, platforms) {
   let status;
   if (g.is_jp_only) status = `<p class="status jp-only"><span class="dot"></span>Japan only. This game was never released outside Japan on the ${esc(platform.name_en)}.</p>`;
   else if (g.is_west_only) status = `<p class="status west-only"><span class="dot"></span>Western only. This game was never released in Japan on the ${esc(platform.name_en)}.</p>`;
+  else if (g.is_west_physical_only) status = `<p class="status west-phys"><span class="dot"></span>Physical in the West only. In Japan it was released on the ${esc(platform.name_en)} as a download.</p>`;
   else if (west.length) status = `<p class="status west"><span class="dot"></span>Also released in ${west.map(r => REGION[r.region]).filter((v, i, a) => a.indexOf(v) === i).join(' and ')}.</p>`;
   else status = `<p class="status unknown"><span class="dot"></span>Western release not yet confirmed.</p>`;
 
