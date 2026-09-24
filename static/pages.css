@@ -63,6 +63,7 @@ a:focus-visible, .btn:focus-visible { outline: 3px solid var(--ring); outline-of
 .status .dot { display: none; }
 .status.jp-only { color: var(--r-jp); }
 .status.west { color: var(--r-na); }
+.status.west-only { color: var(--r-na); border-style: double; border-width: 3px; }
 .status.unknown { color: var(--muted); border-style: dashed; }
 
 .facts { margin: 26px 0 0; display: grid; grid-template-columns: auto 1fr; font-size: 14px; border-top: 1.5px solid var(--ink); }
@@ -108,6 +109,7 @@ section h2 { font-family: var(--serif); font-size: 20px; margin: 0 0 10px; }
 .index .ja, .plats .ja { color: var(--muted); font-size: 13px; margin-left: 6px; }
 .index .yr, .plats .yr { color: var(--muted); font-size: 13px; margin-left: 6px; white-space: nowrap; }
 .index .tag { display: inline-block; margin-left: 8px; padding: 0 7px; border: 1px solid currentColor; border-radius: 2px; color: var(--r-jp); font-size: 12px; font-weight: 500; vertical-align: 1px; }
+.index .tag.west { color: var(--r-na); }
 .plats li { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
 .plats a { font-family: var(--serif); font-weight: 700; }
 
