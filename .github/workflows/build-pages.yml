@@ -22,6 +22,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install the shelf-image renderer and fonts
+        run: npm install --no-save --no-audit --no-fund @resvg/resvg-js@2 @expo-google-fonts/libre-caslon-text @expo-google-fonts/inter @expo-google-fonts/shippori-mincho-b1
+
       - name: Generate pages
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
@@ -33,7 +36,7 @@ jobs:
         run: |
           git config user.name "tana-pages[bot]"
           git config user.email "tana-pages@users.noreply.github.com"
-          git add -A game platform sitemaps sitemap.xml robots.txt .nojekyll
+          git add -A game platform sitemaps sitemap.xml robots.txt .nojekyll u 404.html
           if git diff --cached --quiet; then
             echo "No page changes."
           else
