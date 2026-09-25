@@ -9,6 +9,7 @@
 
 import { mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
+import { createRequire } from 'node:module';
 
 const SITE = (process.env.SITE_URL || 'https://tana.gamingjapanese.com').replace(/\/$/, '');
 const OUT = process.env.OUT_DIR || '.';
@@ -93,7 +94,7 @@ function description(g, platform) {
 }
 
 // ---------- page template ----------
-function layout({ title, desc, canonical, body, jsonld, platformColor }) {
+function layout({ title, desc, canonical, body, jsonld, platformColor, ogImage, noindex }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -107,7 +108,7 @@ function layout({ title, desc, canonical, body, jsonld, platformColor }) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${esc(canonical)}">
-<meta property="og:image" content="${SITE}/static/og.png">
+<meta property="og:image" content="${esc(ogImage || `${SITE}/static/og.png`)}">${noindex ? '\n<meta name="robots" content="noindex">' : ''}
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -329,6 +330,7 @@ async function main() {
   await writeIfChanged(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapIndex.map(s => `<sitemap><loc>${esc(s.loc)}</loc>${s.lastmod ? `<lastmod>${s.lastmod.slice(0, 10)}</lastmod>` : ''}</sitemap>`).join('\n')}\n</sitemapindex>\n`);
   await writeIfChanged(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
   await writeIfChanged(join(OUT, '.nojekyll'), '');
+  await buildProfiles();
 
   console.log(`${works.size} games, ${platformsRaw.length} platforms, ${written} game pages changed, ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 }
@@ -337,6 +339,164 @@ async function writeIfChanged(path, content) {
   try { if (await readFile(path, 'utf8') === content) return false; } catch {}
   await writeFile(path, content);
   return true;
+}
+
+// ---------- Member share pages ----------
+// /u/<username>/            page with the member's shelf, preview tags and a shelf image
+// /u/<username>/shelf.png   1200x630 preview image drawn from their collection
+// /u/<username>/embed/      a one-shelf widget for blogs and forums (iframe)
+// Only public collections; adult titles never appear. Pages of collections made private are deleted.
+const BOX = { dvd: [150, 22], jewel: [100, 19], umd: [114, 20], handheld: [98, 20], switchcase: [132, 18],
+  cartbox: [112, 30], famicom: [104, 24], smallbox: [90, 24], hucard: [96, 18], aes: [160, 38], bigbox: [150, 36] };
+const BOX_OF = { ps2: 'dvd', ps3: 'dvd', ps4: 'dvd', ps5: 'dvd', xbox: 'dvd', x360: 'dvd', xone: 'dvd', xsx: 'dvd', gc: 'dvd', wii: 'dvd', wiiu: 'dvd',
+  ps1: 'jewel', ss: 'jewel', dc: 'jewel', mcd: 'jewel', pcecd: 'jewel', pcfx: 'jewel', neocd: 'jewel', '3do': 'jewel', playdia: 'jewel', pippin: 'jewel', towns: 'jewel',
+  psp: 'umd', vita: 'handheld', nds: 'handheld', n3ds: 'handheld', switch: 'switchcase', switch2: 'switchcase',
+  fc: 'famicom', fds: 'famicom', gb: 'smallbox', gbc: 'smallbox', gba: 'smallbox', gg: 'smallbox', ws: 'smallbox', wsc: 'smallbox',
+  ngp: 'smallbox', ngpc: 'smallbox', pokemini: 'smallbox', pce: 'hucard', sgx: 'hucard', neogeo: 'aes', pc88: 'bigbox', pc98: 'bigbox', x68k: 'bigbox' };
+const boxOf = b => BOX[BOX_OF[b.pf] || (b.m === 'disc' ? 'jewel' : b.m === 'floppy' ? 'bigbox' : 'cartbox')];
+const isJa = t => /[\u3040-\u30ff\u3400-\u9fff]/.test(t || '');
+const plural = (n, one, many = one + 's') => `${Number(n).toLocaleString('en-US')} ${n === 1 ? one : many}`;
+function statsLine(p) {
+  return [plural(p.games, 'game'), p.jp_only ? `${Number(p.jp_only).toLocaleString('en-US')} Japan only` : null,
+          plural(p.platforms, 'platform'), p.verified ? `${Number(p.verified).toLocaleString('en-US')} verified` : null].filter(Boolean).join(' · ');
+}
+function clip(t, max) { const a = [...String(t || '')]; return a.length > max ? a.slice(0, Math.max(1, max - 1)).join('') + '…' : a.join(''); }
+
+// The preview image: title, counts, and a bookcase of their boxes in platform colours
+function shelfSvg(p) {
+  const W = 1200, H = 630, S = 1.6, left = 64, right = 1136, top = 262, floor = 566, inner = right - left - 28 - 20;
+  const books = []; let used = 0, prev = null, more = 0;
+  const all = p.books || [], total = Math.max(p.editions || 0, all.length);
+  const fitsAll = all.reduce((sum, b, k) => sum + Math.round(boxOf(b)[1] * S) + (k && all[k - 1].pf !== b.pf ? 12 : 1), 0) <= inner && total <= all.length;
+  const room = fitsAll ? inner : inner - 160;   // keep a clear stretch of shelf for the "+ N more" label
+  for (const b of all) {
+    const [h, w] = boxOf(b); const bw = Math.round(w * S), gap = prev && prev !== b.pf ? 12 : 1;
+    if (used + gap + bw > room) { more++; continue; }
+    books.push({ ...b, bh: Math.round(h * S), bw, x: used + gap }); used += gap + bw; prev = b.pf;
+  }
+  more += Math.max(0, (p.editions || 0) - (p.books || []).length);
+  let x0 = left + 14 + 10;
+  const spines = books.map(b => {
+    const x = x0 + b.x, y = floor - b.bh, ja = isJa(b.t);
+    const fs = Math.max(11, Math.min(ja ? 17 : 15, b.bw * (ja ? 0.5 : 0.44)));
+    const room = b.bh - 26 - 18, cap = Math.max(2, Math.floor(room / (fs * (ja ? 1.04 : 0.6))));
+    const cx = x + b.bw / 2;
+    return `<g><rect x="${x}" y="${y}" width="${b.bw}" height="${b.bh}" rx="2" fill="${esc(b.c)}"/>
+<rect x="${x}" y="${y}" width="${b.bw}" height="${b.bh}" rx="2" fill="url(#gloss)"/>
+<rect x="${x + 4}" y="${y + 6}" width="${b.bw - 8}" height="1.5" fill="#FFFFFF" fill-opacity=".45"/>
+<text x="${cx}" y="${y + 16}" writing-mode="tb" font-family="${ja ? 'Shippori Mincho B1' : 'Inter'}" font-weight="${ja ? 700 : 600}" font-size="${fs.toFixed(1)}" fill="#FFFFFF">${esc(clip(b.t, cap))}</text>
+<text x="${cx}" y="${floor - 6}" text-anchor="middle" font-family="Inter" font-weight="600" font-size="9" fill="#FFFFFF" fill-opacity=".85">${esc(clip(b.s, Math.max(2, Math.floor(b.bw / 6))))}</text></g>`;
+  }).join('\n');
+  const name = clip(p.display_name, 28);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+<defs><linearGradient id="gloss" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".24"/><stop offset=".26" stop-color="#FFFFFF" stop-opacity=".05"/><stop offset=".56" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity=".3"/></linearGradient>
+<linearGradient id="plank" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C39162"/><stop offset=".2" stop-color="#A8764A"/><stop offset=".7" stop-color="#A8764A"/><stop offset="1" stop-color="#75492A"/></linearGradient>
+<linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000000" stop-opacity=".4"/><stop offset="1" stop-color="#000000" stop-opacity="0"/></linearGradient></defs>
+<rect width="${W}" height="${H}" fill="#ECEBE6"/>
+<rect x="${left}" y="54" width="7" height="30" rx="1" fill="#B4452A"/><rect x="${left + 10}" y="48" width="7" height="36" rx="1" fill="#2C4A7E"/><rect x="${left + 20}" y="58" width="7" height="26" rx="1" fill="#2E6A4E"/>
+<text x="${left + 38}" y="82" font-family="Libre Caslon Text" font-weight="700" font-size="30" fill="#1D1B17">Tana</text>
+<text x="${right}" y="82" text-anchor="end" font-family="Inter" font-weight="400" font-size="20" fill="#6B675E">tana.gamingjapanese.com</text>
+<text x="${left}" y="170" font-family="Libre Caslon Text" font-weight="700" font-size="58" fill="#1D1B17">${esc(name)}’s shelf</text>
+<text x="${left}" y="218" font-family="Inter" font-weight="400" font-size="26" fill="#5D5A52">${esc(statsLine(p))}</text>
+<rect x="${left}" y="${top - 12}" width="${right - left}" height="12" fill="#75492A"/>
+<rect x="${left}" y="${top}" width="${right - left}" height="${floor - top}" fill="#3D2B1E"/>
+<rect x="${left + 14}" y="${top}" width="${right - left - 28}" height="34" fill="url(#shade)"/>
+<rect x="${left}" y="${top}" width="14" height="${floor - top + 22}" fill="#75492A"/><rect x="${right - 14}" y="${top}" width="14" height="${floor - top + 22}" fill="#75492A"/>
+${spines}
+<rect x="${left}" y="${floor}" width="${right - left}" height="22" fill="url(#plank)"/>
+${more ? `<text x="${right - 24}" y="${floor - 14}" text-anchor="end" font-family="Inter" font-weight="600" font-size="18" fill="#E9DFD2">+ ${Number(more).toLocaleString('en-US')} more</text>` : ''}
+</svg>`;
+}
+
+// Static shelf for the HTML pages: shelves of up to 20 boxes
+function shelfHtml(books, perShelf = 20, maxW = 640) {
+  const shelves = []; let cur = [], used = 0, prev = null;
+  for (const b of books) {
+    const [h, w] = boxOf(b); const gap = prev && prev !== b.pf ? 11 : 1;
+    if (cur.length >= perShelf || used + gap + w > maxW) { shelves.push(cur); cur = []; used = 0; prev = null; }
+    cur.push({ ...b, h, w, startGroup: !!(cur.length && prev !== b.pf) }); used += (cur.length > 1 ? gap : 0) + w; prev = b.pf;
+  }
+  if (cur.length) shelves.push(cur);
+  return shelves.map(list => `<div class="prow">${list.map(b => {
+    const fs = w => (w >= 30 ? 12 : w >= 22 ? 10.5 : 9.5);
+    return `<span class="pbook${b.startGroup ? ' pgap' : ''}" style="--obi:${esc(b.c)};--h:${b.h}px;--w:${b.w}px;--fs:${fs(b.w)}px" title="${esc(b.t)}"><span class="pbook-t"${isJa(b.t) ? ' lang="ja"' : ''}>${esc(b.t)}</span><span class="pbook-p">${esc(b.s)}</span></span>`;
+  }).join('')}</div>`).join('');
+}
+
+function profilePage(p) {
+  const url = `${SITE}/u/${encodeURIComponent(p.username)}/`;
+  const title = `${p.display_name}’s shelf on Tana`;
+  const desc = `${statsLine(p)}. A physical game collection by region and edition.`;
+  const body = `<section class="profile">
+  <p class="crumb"><a href="${SITE}/">Tana</a>, member collection</p>
+  <h1>${esc(p.display_name)}’s shelf</h1>
+  <p class="lede">${esc(statsLine(p))}</p>
+  ${p.bio ? `<p class="bio">${esc(p.bio)}</p>` : ''}
+  <div class="pcase">${shelfHtml(p.books || []) || '<p class="pcase-empty">The shelf is empty for now.</p>'}</div>
+  ${(p.editions || 0) > (p.books || []).length ? `<p class="muted">Showing ${(p.books || []).length} of ${Number(p.editions).toLocaleString('en-US')} editions.</p>` : ''}
+  <p class="actions"><a class="btn primary" href="${SITE}/#/u/${encodeURIComponent(p.username)}">Open the full collection</a> <a class="btn" href="${SITE}/">Start your own shelf</a></p>
+</section>`;
+  return layout({ title, desc, canonical: url, body, ogImage: `${SITE}/u/${encodeURIComponent(p.username)}/shelf.png`, noindex: true });
+}
+
+function embedPage(p) {
+  const books = (p.books || []).slice(0, 40);
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(p.display_name)}’s shelf on Tana</title><meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:wght@700&family=Shippori+Mincho+B1:wght@700&family=Zen+Kaku+Gothic+New:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="${SITE}/static/pages.css"></head>
+<body class="embed"><a class="embed-card" href="${SITE}/u/${encodeURIComponent(p.username)}/" target="_blank" rel="noopener">
+<span class="embed-head"><strong>${esc(p.display_name)}’s shelf</strong> <span>${esc(statsLine(p))}</span></span>
+<span class="pcase one">${shelfHtml(books, 40, 4000)}</span>
+<span class="embed-foot">View on Tana</span></a></body></html>
+`;
+}
+
+const NOT_FOUND = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Tana</title><meta name="robots" content="noindex">
+<script>
+// Share links for members whose page has not been built yet (pages are built nightly) open the app instead
+var m = location.pathname.match(/^\\/u\\/([^\\/]+)/);
+location.replace(m ? '/#/u/' + m[1] : '/');
+</script></head><body><p><a href="/">Tana</a></p></body></html>
+`;
+
+async function writeBinIfChanged(path, buf) {
+  try { const old = await readFile(path); if (Buffer.compare(old, buf) === 0) return false; } catch {}
+  await writeFile(path, buf); return true;
+}
+
+async function buildProfiles() {
+  const profiles = SAMPLE ? JSON.parse(await readFile(join(SAMPLE, 'profiles.json'), 'utf8')) : await rpc('pages_profiles', {});
+  await mkdir(join(OUT, 'u'), { recursive: true });
+  let Resvg = null, fontFiles = [];
+  try {
+    ({ Resvg } = await import('@resvg/resvg-js'));
+    const req = createRequire(import.meta.url);
+    fontFiles = ['@expo-google-fonts/libre-caslon-text/700Bold/LibreCaslonText_700Bold.ttf', '@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf',
+                 '@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf', '@expo-google-fonts/shippori-mincho-b1/700Bold/ShipporiMinchoB1_700Bold.ttf'].map(f => req.resolve(f));
+  } catch (e) { console.warn('Shelf images skipped (renderer or fonts not installed):', e.message); Resvg = null; }
+  const keep = new Set();
+  let pages = 0, images = 0;
+  for (const p of profiles) {
+    if (!/^[a-z0-9_.-]{1,40}$/i.test(p.username)) continue;
+    const dir = join(OUT, 'u', p.username.toLowerCase());
+    keep.add(p.username.toLowerCase());
+    await mkdir(join(dir, 'embed'), { recursive: true });
+    if (await writeIfChanged(join(dir, 'index.html'), profilePage(p))) pages++;
+    await writeIfChanged(join(dir, 'embed', 'index.html'), embedPage(p));
+    if (Resvg) {
+      const png = new Resvg(shelfSvg(p), { fitTo: { mode: 'width', value: 1200 }, font: { fontFiles, loadSystemFonts: false, defaultFontFamily: 'Inter' } }).render().asPng();
+      if (await writeBinIfChanged(join(dir, 'shelf.png'), png)) images++;
+    }
+  }
+  // Collections made private (or renamed) lose their pages
+  for (const d of await readdir(join(OUT, 'u')).catch(() => [])) {
+    if (!keep.has(d)) await rm(join(OUT, 'u', d), { recursive: true, force: true });
+  }
+  await writeIfChanged(join(OUT, '404.html'), NOT_FOUND);
+  console.log(`${profiles.length} public collections, ${pages} member pages changed, ${images} shelf images changed`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
