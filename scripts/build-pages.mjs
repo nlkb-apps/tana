@@ -39,7 +39,7 @@ async function* loadGames(platformId) {
     return;
   }
   for (let offset = 0; ; offset += PAGE) {
-    const rows = await rpc('pages_export', { p_platform: platformId, p_limit: PAGE, p_offset: offset, p_include_west: true });
+    const rows = await rpc('pages_export', { p_platform: platformId, p_limit: PAGE, p_offset: offset, p_include_west: true, p_regions: ['JP', 'NA', 'EU', 'AS', 'KR', 'BR', 'OTHER'] });
     for (const g of rows) yield g;
     if (rows.length < PAGE) break;
   }
@@ -49,7 +49,7 @@ async function* loadGames(platformId) {
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const isLatin = s => !!s && /^[\x20-\x7E\u00A0-\u024F\u2010-\u2027\u2030-\u205E]+$/.test(s);
 const hasJa = s => !!s && /[぀-ヿ一-鿿]/.test(s);
-const REGION = { JP: 'Japan', NA: 'North America', EU: 'Europe' };
+const REGION = { JP: 'Japan', NA: 'North America', EU: 'Europe', AS: 'Asia', KR: 'Korea', BR: 'Brazil', OTHER: 'Other regions' };
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 function fmtDate(iso, precision) {
