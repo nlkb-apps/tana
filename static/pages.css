@@ -3,7 +3,7 @@
 :root {
   --bg: #ECEBE6; --surface: #F7F6F2; --ink: #1F1C19; --muted: #67625A; --line: #D6D2C8; --line-strong: #B9B2A4;
   --accent: #5E3FA8; --accent-2: #4A2F8C; --accent-ink: #FFFFFF; --ring: rgba(94, 63, 168, .24); --fuji-soft: #E7E2F0;
-  --r-jp: #B4452A; --r-na: #2C4A7E; --r-eu: #2E6A4E;
+  --r-jp: #B4452A; --r-na: #2C4A7E; --r-eu: #2E6A4E; --r-as: #8C6A14; --r-kr: #7A3E6E;
   --obi: #5E3FA8;
   --serif: "Libre Caslon Text", "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
   --mincho: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
@@ -13,7 +13,7 @@
   :root {
     --bg: #171A21; --surface: #1E212A; --ink: #ECE8DF; --muted: #A7A193; --line: #2C303B; --line-strong: #474C59;
     --accent: #B9A2FF; --accent-2: #D0C1FF; --accent-ink: #171A21; --ring: rgba(185, 162, 255, .3); --fuji-soft: #262338;
-    --r-jp: #EE8E70; --r-na: #92B0EC; --r-eu: #82C6A2;
+    --r-jp: #EE8E70; --r-na: #92B0EC; --r-eu: #82C6A2; --r-as: #D9B25C; --r-kr: #D39AC6;
   }
 }
 * { box-sizing: border-box; }
@@ -76,7 +76,7 @@ section { margin-top: 32px; }
 section h2 { font-family: var(--serif); font-size: 20px; margin: 0 0 10px; }
 .rel { display: grid; grid-template-columns: 118px 1fr; gap: 12px; padding: 10px 0 10px 12px; border-top: 1px solid var(--line); border-left: 3px solid var(--line-strong); font-size: 14px; }
 .rel:last-child { border-bottom: 1px solid var(--line); }
-.rel[data-region="NA"] { border-left-color: var(--r-na); } .rel[data-region="EU"] { border-left-color: var(--r-eu); } .rel[data-region="JP"] { border-left-color: var(--r-jp); }
+.rel[data-region="NA"] { border-left-color: var(--r-na); } .rel[data-region="EU"] { border-left-color: var(--r-eu); } .rel[data-region="JP"] { border-left-color: var(--r-jp); } .rel[data-region="AS"] { border-left-color: var(--r-as); } .rel[data-region="KR"] { border-left-color: var(--r-kr); }
 .rel-region { font-family: var(--serif); font-weight: 700; }
 .rel[data-region="NA"] .rel-region { color: var(--r-na); } .rel[data-region="EU"] .rel-region { color: var(--r-eu); }
 .rel-title { font-weight: 500; }
