@@ -19,12 +19,21 @@ const SAMPLE = process.env.SAMPLE_DIR;
 const PAGE = 1000;
 
 // ---------- data ----------
-async function rpc(name, args) {
+// A call that times out (the public role allows 3 seconds; a cold cache can be slow) is retried twice
+async function rpc(name, args, attempt = 1) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
     method: 'POST', headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(args || {}),
   });
-  if (!res.ok) throw new Error(`${name} failed: HTTP ${res.status} ${await res.text()}`);
+  if (!res.ok) {
+    const text = await res.text();
+    if (attempt < 3 && (res.status >= 500 || /57014|statement timeout/.test(text))) {
+      console.warn(`${name}: ${res.status} on attempt ${attempt}, retrying`);
+      await new Promise(r => setTimeout(r, 4000 * attempt));
+      return rpc(name, args, attempt + 1);
+    }
+    throw new Error(`${name} failed: HTTP ${res.status} ${text}`);
+  }
   return res.json();
 }
 
