@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Tana</title><meta name="robots" content="noindex">
+<script>
+// Share links for members whose page has not been built yet (pages are built nightly) open the app instead
+var m = location.pathname.match(/^\/u\/([^\/]+)/);
+location.replace(m ? '/#/u/' + m[1] : '/');
+</script></head><body><p><a href="/">Tana</a></p></body></html>
