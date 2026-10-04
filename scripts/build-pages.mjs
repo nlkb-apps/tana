@@ -131,14 +131,14 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 <body${platformColor ? ` style="--obi:${esc(platformColor)}"` : ''}>
 <header class="top">
   <a class="brand" href="${SITE}/"><svg class="brand-mark" viewBox="0 0 22 24" aria-hidden="true"><rect class="s1" x="1" y="5" width="5" height="19" rx="1"/><rect class="s2" x="8.5" y="1" width="5" height="23" rx="1"/><rect class="s3" x="16" y="8" width="5" height="16" rx="1"/></svg><span class="brand-ja" lang="ja">棚</span> Tana</a>
-  <a class="top-link" href="${SITE}/platform/">All platforms</a>
+  <nav class="top-links"><a class="top-link" href="${SITE}/help/">Help</a><a class="top-link" href="${SITE}/platform/">All platforms</a></nav>
 </header>
 <main class="page">
 ${body}
 </main>
 <footer class="foot">
   <p>Tana catalogues physical game releases by region and edition, kept by collectors. Catalogue data is available under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, built on Wikipedia, Wikidata, Redump and MAME among other sources.</p>
-  <p>© NLKB Consulting Co., Ltd. · <a href="${SITE}/#/privacy">Privacy</a></p>
+  <p>© NLKB Consulting Co., Ltd. · <a href="${SITE}/#/privacy">Privacy</a> · <a href="https://discord.gg/RfwNdPS8G" rel="noopener">Discord</a> · <a href="https://www.reddit.com/r/tanashelf/" rel="noopener">r/tanashelf</a></p>
 </footer>
 </body>
 </html>
@@ -336,6 +336,11 @@ async function main() {
     sitemapIndex.push({ loc: `${SITE}/sitemaps/${p.id}.xml`, lastmod: urls[0].lastmod });
   }
   await writeIfChanged(join(OUT, 'platform', 'index.html'), platformsIndex(platformsRaw));
+  const helpUrls = await buildHelp();
+  if (helpUrls.length) {
+    await writeIfChanged(join(OUT, 'sitemaps', 'help.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${helpUrls.map(u => `<url><loc>${esc(u.loc)}</loc><lastmod>${u.lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`);
+    sitemapIndex.push({ loc: `${SITE}/sitemaps/help.xml`, lastmod: helpUrls.reduce((m, u) => u.lastmod > m ? u.lastmod : m, '') });
+  }
   await writeIfChanged(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapIndex.map(s => `<sitemap><loc>${esc(s.loc)}</loc>${s.lastmod ? `<lastmod>${s.lastmod.slice(0, 10)}</lastmod>` : ''}</sitemap>`).join('\n')}\n</sitemapindex>\n`);
   await writeIfChanged(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
   await writeIfChanged(join(OUT, '.nojekyll'), '');
@@ -506,6 +511,98 @@ async function buildProfiles() {
   }
   await writeIfChanged(join(OUT, '404.html'), NOT_FOUND);
   console.log(`${profiles.length} public collections, ${pages} member pages changed, ${images} shelf images changed`);
+}
+
+// ---------- Help pages ----------
+// Source: help-src/*.md (written by hand). Pages with "status: ready" are published under /help/<slug>/.
+// The Markdown used is deliberately small: headings, paragraphs, "- " lists and [links](...).
+function parseHelp(text) {
+  const m = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  const meta = {};
+  if (m) for (const line of m[1].split('\n')) { const i = line.indexOf(':'); if (i > 0) meta[line.slice(0, i).trim()] = line.slice(i + 1).trim(); }
+  return { meta, body: m ? m[2] : text };
+}
+const COMMUNITY = [['discord.gg/RfwNdPS8G', 'https://discord.gg/RfwNdPS8G'], ['r/tanashelf', 'https://www.reddit.com/r/tanashelf/']];
+function inline(t, linkFor) {
+  let h = esc(t);
+  h = h.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label, href) => `<a href="${esc(linkFor(href))}">${label}</a>`);
+  for (const [text, href] of COMMUNITY) h = h.split(esc(text)).join(`<a href="${href}" rel="noopener">${esc(text)}</a>`);
+  return h;
+}
+function helpHtml(body, linkFor) {
+  const out = []; let para = [], list = null;
+  const flush = () => {
+    if (para.length) { out.push(`<p>${inline(para.join(' '), linkFor)}</p>`); para = []; }
+    if (list) { out.push(`<ul>${list.map(li => `<li>${inline(li, linkFor)}</li>`).join('')}</ul>`); list = null; }
+  };
+  for (const raw of body.replace(/<!--[\s\S]*?-->/g, '').split('\n')) {
+    const line = raw.trimEnd();
+    if (!line.trim()) { flush(); continue; }
+    const h = line.match(/^(#{1,3})\s+(.*)$/);
+    if (h) { flush(); const lvl = Math.min(3, h[1].length + 1); out.push(`<h${lvl}>${inline(h[2], linkFor)}</h${lvl}>`); continue; }
+    const li = line.match(/^\s*-\s+(.*)$/);
+    if (li) { if (para.length) { out.push(`<p>${inline(para.join(' '), linkFor)}</p>`); para = []; } (list = list || []).push(li[1]); continue; }
+    if (list) { list[list.length - 1] += ' ' + line.trim(); continue; }
+    para.push(line.trim());
+  }
+  flush();
+  return out.join('\n');
+}
+async function buildHelp() {
+  const dir = SAMPLE ? join(SAMPLE, 'help-src') : 'help-src';
+  let files = [];
+  try { files = (await readdir(dir)).filter(f => f.endsWith('.md') && !f.startsWith('_')); } catch { return []; }
+  const pages = [];
+  for (const f of files) {
+    const { meta, body } = parseHelp(await readFile(join(dir, f), 'utf8'));
+    if (meta.status !== 'ready') continue;
+    pages.push({ file: f, slug: meta.slug || f.replace(/\.md$/, ''), title: meta.title || f, section: meta.section || '', order: meta.order || '', updated: (meta.updated || '').slice(0, 10), body });
+  }
+  if (!pages.length) return [];
+  const key = o => String(o).split('.').map(x => (/^\d+$/.test(x) ? x.padStart(3, '0') : x)).join('.');
+  pages.sort((a, b) => key(a.order).localeCompare(key(b.order)));
+  const bySlug = new Map(pages.map(p => [p.file, p]));
+  const linkFor = href => {
+    if (/^https?:/.test(href)) return href;
+    const p = bySlug.get(href.replace(/^\.\//, ''));
+    return p ? (p.slug === 'index' ? `${SITE}/help/` : `${SITE}/help/${p.slug}/`) : href;
+  };
+  const index = pages.find(p => p.slug === 'index');
+  const topics = pages.filter(p => p.slug !== 'index');
+  await rm(join(OUT, 'help'), { recursive: true, force: true });
+  await mkdir(join(OUT, 'help'), { recursive: true });
+  const urls = [];
+  // The contents page
+  const indexBody = index ? index.body.replace(/^#\s+.*\n/m, '') : '';
+  await writeIfChanged(join(OUT, 'help', 'index.html'), layout({
+    title: 'Help · Tana', desc: 'How to use Tana: searching, editions and regions, your collection, photos, sharing and contributing.',
+    canonical: `${SITE}/help/`,
+    body: `<article class="help">\n<p class="crumb"><a href="${SITE}/">Tana</a></p>\n<h1>Tana help</h1>\n<div class="help-toc">${helpHtml(indexBody, linkFor)}</div>\n</article>`,
+  }));
+  urls.push({ loc: `${SITE}/help/`, lastmod: (index && index.updated) || topics[0].updated });
+  // One page per topic, with previous / next
+  for (let i = 0; i < topics.length; i++) {
+    const p = topics[i], prev = topics[i - 1], next = topics[i + 1];
+    const content = helpHtml(p.body.replace(/^#\s+.*\n/m, ''), linkFor);
+    const plain = p.body.replace(/^#\s+.*\n/m, '').replace(/[#\[\]()*-]/g, ' ').replace(/\s+/g, ' ').trim();
+    await mkdir(join(OUT, 'help', p.slug), { recursive: true });
+    await writeIfChanged(join(OUT, 'help', p.slug, 'index.html'), layout({
+      title: `${p.title} · Tana help`, desc: plain.slice(0, 155), canonical: `${SITE}/help/${p.slug}/`,
+      body: `<article class="help">
+<p class="crumb"><a href="${SITE}/help/">Help</a>${p.section ? `, ${esc(p.section)}` : ''}</p>
+<h1>${esc(p.title)}</h1>
+${content}
+<nav class="help-nav" aria-label="More help">
+  ${prev ? `<a class="help-prev" href="${SITE}/help/${prev.slug}/"><span>Previous</span>${esc(prev.title)}</a>` : '<span></span>'}
+  ${next ? `<a class="help-next" href="${SITE}/help/${next.slug}/"><span>Next</span>${esc(next.title)}</a>` : '<span></span>'}
+</nav>
+<p class="help-all"><a href="${SITE}/help/">All help topics</a> · <a href="${SITE}/">Open Tana</a></p>
+</article>`,
+    }));
+    urls.push({ loc: `${SITE}/help/${p.slug}/`, lastmod: p.updated });
+  }
+  console.log(`${topics.length} help pages`);
+  return urls;
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
