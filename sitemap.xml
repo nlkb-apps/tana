@@ -9,7 +9,7 @@
 <sitemap><loc>https://tana.gamingjapanese.com/sitemaps/gc.xml</loc><lastmod>2026-10-02</lastmod></sitemap>
 <sitemap><loc>https://tana.gamingjapanese.com/sitemaps/wii.xml</loc><lastmod>2026-09-25</lastmod></sitemap>
 <sitemap><loc>https://tana.gamingjapanese.com/sitemaps/wiiu.xml</loc><lastmod>2026-09-25</lastmod></sitemap>
-<sitemap><loc>https://tana.gamingjapanese.com/sitemaps/switch.xml</loc><lastmod>2026-10-02</lastmod></sitemap>
+<sitemap><loc>https://tana.gamingjapanese.com/sitemaps/switch.xml</loc><lastmod>2026-10-04</lastmod></sitemap>
 <sitemap><loc>https://tana.gamingjapanese.com/sitemaps/switch2.xml</loc><lastmod>2026-09-24</lastmod></sitemap>
 <sitemap><loc>https://tana.gamingjapanese.com/sitemaps/gb.xml</loc><lastmod>2026-09-24</lastmod></sitemap>
 <sitemap><loc>https://tana.gamingjapanese.com/sitemaps/vb.xml</loc><lastmod>2026-09-24</lastmod></sitemap>
@@ -62,4 +62,5 @@
 <sitemap><loc>https://tana.gamingjapanese.com/sitemaps/towns.xml</loc><lastmod>2026-09-25</lastmod></sitemap>
 <sitemap><loc>https://tana.gamingjapanese.com/sitemaps/msx.xml</loc><lastmod>2026-09-25</lastmod></sitemap>
 <sitemap><loc>https://tana.gamingjapanese.com/sitemaps/msx2.xml</loc><lastmod>2026-10-02</lastmod></sitemap>
+<sitemap><loc>https://tana.gamingjapanese.com/sitemaps/help.xml</loc><lastmod>2026-09-29</lastmod></sitemap>
 </sitemapindex>
