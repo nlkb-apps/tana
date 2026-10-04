@@ -36,7 +36,7 @@ jobs:
         run: |
           git config user.name "tana-pages[bot]"
           git config user.email "tana-pages@users.noreply.github.com"
-          git add -A game platform sitemaps sitemap.xml robots.txt .nojekyll u 404.html
+          git add -A game platform sitemaps sitemap.xml robots.txt .nojekyll u 404.html help
           if git diff --cached --quiet; then
             echo "No page changes."
           else
