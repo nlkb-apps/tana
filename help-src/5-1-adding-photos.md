@@ -4,7 +4,7 @@ slug: adding-photos
 section: Photos
 order: 5.1
 status: ready
-updated: 2026-09-29
+updated: 2026-10-05
 ---
 
 # Adding photos of your copies
@@ -15,4 +15,4 @@ To add one, open your collection, switch to the list view, and tap Photos on the
 
 Every photo has to be your own, of a copy you actually own. You'll be asked to confirm that before uploading. Images from shops, auction or flea-market listings, other people's photos, flatbed scans, screenshots, magazine scans and promotional art aren't allowed.
 
-Photos are resized in your browser before uploading, and a thumbnail is made automatically.
+Photos are resized in your browser before uploading, and a thumbnail is made automatically. Each member can store up to 500 photos.

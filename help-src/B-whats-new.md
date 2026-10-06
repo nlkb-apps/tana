@@ -4,10 +4,14 @@ slug: whats-new
 section: Appendices
 order: B
 status: ready
-updated: 2026-09-29
+updated: 2026-10-05
 ---
 
 # What's new
+
+## 2026-10-05: New games from everywhere, and Recently added
+
+Tana now looks for new Western releases every week as well as Japanese ones, and games that were announced before they came out are now added once they're released. The home page shows the games most recently added to Tana, from every region, newest first.
 
 ## 2026-09-29: Help pages
 

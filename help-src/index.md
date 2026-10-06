@@ -3,7 +3,7 @@ title: Tana help
 slug: index
 order: 0
 status: ready
-updated: 2026-09-29
+updated: 2026-10-05
 ---
 
 # Tana help
@@ -68,6 +68,7 @@ Welcome to the Tana help pages. Whether you're setting up your first shelf or tr
 - [8.2 How Tana decides where a game was released](8-2-evidence-rules.md)
 - [8.3 Serial numbers and product codes](8-3-serials.md)
 - [8.4 Platforms covered](8-4-platforms.md)
+- [8.5 How new games are added](8-5-new-games.md)
 
 ## 9. Account and privacy
 
