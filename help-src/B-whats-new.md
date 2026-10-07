@@ -4,10 +4,16 @@ slug: whats-new
 section: Appendices
 order: B
 status: ready
-updated: 2026-10-06
+updated: 2026-10-07
 ---
 
 # What's new
+
+## 2026-10-07: A new look, and quicker ways to add games
+
+The front page now shows what Tana is in one go: a sample shelf, a link to see a real one, and the search box right there. When you're signed in, it opens with your own newest boxes and shortcuts to scan, tick off a platform or import a list.
+
+You can now add a game from search with one tap on the circle next to it, and game pages have Add to collection, Want it and Share at the top. Picking an edition is a single tap from a list of every edition. Your collection page shows your numbers at a glance, has an Add games button with every way to add in one place, and can sort your shelf by newest first. On a computer, the menu moves to the top bar and pages use the wider screen.
 
 ## 2026-10-06: Game-Key Cards for new Western releases
 
