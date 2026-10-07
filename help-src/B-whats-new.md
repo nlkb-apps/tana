@@ -4,10 +4,14 @@ slug: whats-new
 section: Appendices
 order: B
 status: ready
-updated: 2026-10-05
+updated: 2026-10-06
 ---
 
 # What's new
+
+## 2026-10-06: Game-Key Cards for new Western releases
+
+New Western-only Switch 2 games are now marked as either a full game card or a Game-Key Card when they're added, the same way Japanese releases already were.
 
 ## 2026-10-05: New games from everywhere, and Recently added
 
