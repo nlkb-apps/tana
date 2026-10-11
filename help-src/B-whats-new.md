@@ -15,6 +15,8 @@ You can now drag the boxes on your shelf into any order you like, and Tana keeps
 
 The shelf itself got a polish: real wood grain, a light over each shelf, cases that look like their real counterparts, a band on copies with their obi or spine card, and a shine on sealed copies. Hover over a box to see your photo of it.
 
+Boxes now show the English or romanised name by default, with a small JP, NA or EU sticker for the edition. Choose Japanese titles in Account if you'd rather see Japanese on the spines. Share pages and their pictures follow the same rule.
+
 ## 2026-10-07: A new look, and quicker ways to add games
 
 The front page now shows what Tana is in one go: a sample shelf, a link to see a real one, and the search box right there. When you're signed in, it opens with your own newest boxes and shortcuts to scan, tick off a platform or import a list.

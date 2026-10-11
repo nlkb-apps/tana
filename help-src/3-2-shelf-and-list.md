@@ -11,6 +11,10 @@ updated: 2026-10-11
 
 Your collection opens on the shelf view by default. Each game is drawn as a box on a wooden shelf, in its platform's color, with the title printed on the spine. Box sizes follow the real cases, so a PS2 or GameCube game stands tall and thin, a PS1 jewel case is short, and a Game Boy box is small.
 
+Each box shows the game's English name, or its romanised name if it never came out in English (i.e. Seiken Densetsu 3), so anyone visiting your shelf can read it. A Western copy keeps the name printed on its box (a European Contra says Probotector). If you'd rather see Japanese on the spines, choose Japanese under Game titles in Account. The other name is in the card that opens over the box.
+
+A small sticker at the top of each box shows which edition it is: JP, NA, EU, KR or AS, in that region's color.
+
 The boxes also show a few things about your copy. Jewel cases have the clear plastic hinge, cardboard boxes have a pale cut edge on top, a copy you've marked Sealed has a shrink-wrap shine, and if you ticked Obi band or Spine card for a copy, there's a paper band across its spine.
 
 Hover over a box (or tap it once on a phone) to see the title, platform, region, edition and serial. Tap it again to open the game page.
