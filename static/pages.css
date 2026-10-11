@@ -168,3 +168,10 @@ body.embed { margin: 0; background: transparent; }
 .help-nav span { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
 .help-next { text-align: right; }
 .help-all { font-size: 14px; color: var(--muted); }
+
+/* Region sticker at the top of each box */
+.pcase .pbook-r { flex: none; margin: 0 0 4px; padding: 0 2px; min-width: 15px; font: 800 7.5px/10px "Zen Kaku Gothic New", system-ui, sans-serif; text-align: center;
+  color: var(--rk, #1F1C19); background: #F4EFE4; border-radius: 1px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .35); }
+.pcase .pbook-r[data-r="JP"] { --rk: #B4452A; } .pcase .pbook-r[data-r="NA"] { --rk: #2C4A7E; } .pcase .pbook-r[data-r="EU"] { --rk: #2E6A4E; }
+.pcase .pbook-r[data-r="KR"] { --rk: #7A3E6E; } .pcase .pbook-r[data-r="AS"] { --rk: #8C6A14; }
+.pcase .pbook-t:not(:lang(ja)) { font-family: "Zen Kaku Gothic New", system-ui, sans-serif; }
