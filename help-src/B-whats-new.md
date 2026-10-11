@@ -4,10 +4,16 @@ slug: whats-new
 section: Appendices
 order: B
 status: ready
-updated: 2026-10-07
+updated: 2026-10-11
 ---
 
 # What's new
+
+## 2026-10-11: Arrange your shelf
+
+You can now drag the boxes on your shelf into any order you like, and Tana keeps it as My own order. There are new ways to order the shelf too: release date, series and region, as well as console, title and recently added, with a small label on the shelf edge for each group. Your order is saved to your account and is what visitors see on your public shelf.
+
+The shelf itself got a polish: real wood grain, a light over each shelf, cases that look like their real counterparts, a band on copies with their obi or spine card, and a shine on sealed copies. Hover over a box to see your photo of it.
 
 ## 2026-10-07: A new look, and quicker ways to add games
 
