@@ -377,6 +377,9 @@ function statsLine(p) {
 function clip(t, max) { const a = [...String(t || '')]; return a.length > max ? a.slice(0, Math.max(1, max - 1)).join('') + '…' : a.join(''); }
 
 // The preview image: title, counts, and a bookcase of their boxes in platform colours
+// Region sticker on each box (cream label, region ink), as in the app
+const REG_TAG = { JP: 'JP', NA: 'NA', EU: 'EU', KR: 'KR', AS: 'AS', BR: 'BR' };
+const REG_INK = { JP: '#B4452A', NA: '#2C4A7E', EU: '#2E6A4E', KR: '#7A3E6E', AS: '#8C6A14', BR: '#2E6A4E' };
 function shelfSvg(p) {
   const W = 1200, H = 630, S = 1.6, left = 64, right = 1136, top = 262, floor = 566, inner = right - left - 28 - 20;
   const books = []; let used = 0, prev = null, more = 0;
@@ -393,12 +396,13 @@ function shelfSvg(p) {
   const spines = books.map(b => {
     const x = x0 + b.x, y = floor - b.bh, ja = isJa(b.t);
     const fs = Math.max(11, Math.min(ja ? 17 : 15, b.bw * (ja ? 0.5 : 0.44)));
-    const room = b.bh - 26 - 18, cap = Math.max(2, Math.floor(room / (fs * (ja ? 1.04 : 0.6))));
+    const room = b.bh - 26 - 18 - (REG_TAG[b.reg] ? 16 : 0), cap = Math.max(2, Math.floor(room / (fs * (ja ? 1.04 : 0.6))));
     const cx = x + b.bw / 2;
     return `<g><rect x="${x}" y="${y}" width="${b.bw}" height="${b.bh}" rx="2" fill="${esc(b.c)}"/>
 <rect x="${x}" y="${y}" width="${b.bw}" height="${b.bh}" rx="2" fill="url(#gloss)"/>
 <rect x="${x + 4}" y="${y + 6}" width="${b.bw - 8}" height="1.5" fill="#FFFFFF" fill-opacity=".45"/>
-<text x="${cx}" y="${y + 16}" writing-mode="tb" font-family="${ja ? 'Shippori Mincho B1' : 'Inter'}" font-weight="${ja ? 700 : 600}" font-size="${fs.toFixed(1)}" fill="#FFFFFF">${esc(clip(b.t, cap))}</text>
+${REG_TAG[b.reg] ? `<rect x="${cx - 12}" y="${y + 11}" width="24" height="14" rx="1.5" fill="#F4EFE4"/><text x="${cx}" y="${y + 22}" text-anchor="middle" font-family="Inter" font-weight="800" font-size="10" fill="${REG_INK[b.reg]}">${REG_TAG[b.reg]}</text>` : ''}
+<text x="${cx}" y="${y + (REG_TAG[b.reg] ? 32 : 16)}" writing-mode="tb" font-family="${ja ? 'Shippori Mincho B1' : 'Inter'}" font-weight="${ja ? 700 : 600}" font-size="${fs.toFixed(1)}" fill="#FFFFFF">${esc(clip(b.t, cap))}</text>
 <text x="${cx}" y="${floor - 6}" text-anchor="middle" font-family="Inter" font-weight="600" font-size="9" fill="#FFFFFF" fill-opacity=".85">${esc(clip(b.s, Math.max(2, Math.floor(b.bw / 6))))}</text></g>`;
   }).join('\n');
   const name = clip(p.display_name, 28);
@@ -433,7 +437,7 @@ function shelfHtml(books, perShelf = 20, maxW = 640) {
   if (cur.length) shelves.push(cur);
   return shelves.map(list => `<div class="prow">${list.map(b => {
     const fs = w => (w >= 30 ? 12 : w >= 22 ? 10.5 : 9.5);
-    return `<span class="pbook${b.startGroup ? ' pgap' : ''}" style="--obi:${esc(b.c)};--h:${b.h}px;--w:${b.w}px;--fs:${fs(b.w)}px" title="${esc(b.t)}"><span class="pbook-t"${isJa(b.t) ? ' lang="ja"' : ''}>${esc(b.t)}</span><span class="pbook-p">${esc(b.s)}</span></span>`;
+    return `<span class="pbook${b.startGroup ? ' pgap' : ''}" style="--obi:${esc(b.c)};--h:${b.h}px;--w:${b.w}px;--fs:${fs(b.w)}px" title="${esc(b.t)}">${REG_TAG[b.reg] ? `<span class="pbook-r" data-r="${b.reg}">${b.reg}</span>` : ''}<span class="pbook-t"${isJa(b.t) ? ' lang="ja"' : ''}>${esc(b.t)}</span><span class="pbook-p">${esc(b.s)}</span></span>`;
   }).join('')}</div>`).join('');
 }
 
