@@ -187,3 +187,13 @@ body.embed { margin: 0; background: transparent; }
 .psub-h a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .psub-h span { font-family: "Zen Kaku Gothic New", system-ui, sans-serif; font-size: 14px; font-weight: 500; color: var(--muted); }
 .pcase.psub { margin-top: 12px; width: fit-content; min-width: min(100%, 320px); max-width: 100%; }
+
+/* Box art on game pages, with the release's region patch on top */
+.shelf:has(.boxart) { grid-template-columns: 148px 1fr; }
+.boxart { position: relative; margin: 0; width: 148px; }
+.boxart img { display: block; width: 100%; height: auto; border-radius: 2px; background: #1A1916;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .2), 0 8px 18px rgba(0, 0, 0, .22), inset 0 0 0 1px rgba(0, 0, 0, .14); }
+.boxart .reg { position: absolute; top: 6px; right: 6px; font: 800 11px/1.4 var(--gothic, system-ui), sans-serif; padding: 0 4px; background: #F4EFE4; color: #B4452A;
+  border-radius: 1px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .35), 0 1px 3px rgba(0, 0, 0, .35); }
+.boxart .reg[data-r="NA"] { color: #2C4A7E; } .boxart .reg[data-r="EU"] { color: #2E6A4E; } .boxart .reg[data-r="KR"] { color: #7A3E6E; } .boxart .reg[data-r="AS"] { color: #8C6A14; }
+@media (max-width: 640px) { .shelf:has(.boxart) { grid-template-columns: 112px 1fr; } .boxart { width: 112px; } }

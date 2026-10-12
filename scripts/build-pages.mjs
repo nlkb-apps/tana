@@ -103,7 +103,7 @@ function description(g, platform) {
 }
 
 // ---------- page template ----------
-function layout({ title, desc, canonical, body, jsonld, platformColor, ogImage, noindex }) {
+function layout({ title, desc, canonical, body, jsonld, platformColor, ogImage, noindex, ogPortrait }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -118,9 +118,9 @@ function layout({ title, desc, canonical, body, jsonld, platformColor, ogImage, 
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${esc(canonical)}">
 <meta property="og:image" content="${esc(ogImage || `${SITE}/static/og.png`)}">${noindex ? '\n<meta name="robots" content="noindex">' : ''}
-<meta property="og:image:width" content="1200">
+${ogPortrait ? '' : `<meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
+`}<meta name="twitter:card" content="${ogPortrait ? 'summary' : 'summary_large_image'}">
 <meta name="theme-color" content="#ECEBE6">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -158,6 +158,8 @@ function gamePage(g, platforms) {
   const jans = g.variants.filter(v => v.region === 'JP' && v.jan).map(v => v.jan);
   const editions = g.variants.filter(v => v.label);
   const spineText = g.title_ja || primary;
+  const coverRel = (jp && jp.cover && jp.format !== 'digital' ? jp : null) || g.releases.find(r => r.cover && r.format !== 'digital') || g.releases.find(r => r.cover);
+  const cover = coverRel ? coverRel.cover : null;
 
   const facts = [
     ['Platform', plats.map(p => `<a href="${SITE}/platform/${p.id}/">${esc(p.name_en)}</a>`).join(', '), true],
@@ -208,7 +210,8 @@ function gamePage(g, platforms) {
   const body = `
 <article class="game">
   <div class="shelf">
-    <div class="spine" aria-hidden="true"><span class="spine-title" lang="${hasJa(spineText) ? 'ja' : 'en'}">${esc(spineText)}</span><span class="spine-plat">${esc(platform.short_name)}</span></div>
+    ${cover ? `<figure class="boxart"><img src="${esc(coverUrl(cover, 360))}" alt="Box art${cover.a && cover.a !== coverRel.region ? ` (${esc(REGION[cover.a] || cover.a)} release)` : ''}" loading="eager" decoding="async"><span class="reg" data-r="${esc(coverRel.region)}">${esc(coverRel.region)}</span></figure>`
+      : `<div class="spine" aria-hidden="true"><span class="spine-title" lang="${hasJa(spineText) ? 'ja' : 'en'}">${esc(spineText)}</span><span class="spine-plat">${esc(platform.short_name)}</span></div>`}
     <div class="game-head">
       <p class="crumb"><a href="${SITE}/platform/${platform.id}/">${esc(platform.name_en)}</a>${(jp || firstRelease(g))?.date ? `, ${esc(String((jp || firstRelease(g)).date).slice(0, 4))}` : ''}</p>
       <h1${hasJa(primary) ? ' lang="ja"' : ''}>${esc(primary)}</h1>
@@ -243,11 +246,13 @@ function gamePage(g, platforms) {
     ...(g.developer ? { author: { '@type': 'Organization', name: g.developer } } : {}),
     ...(g.genre ? { genre: g.genre } : {}),
     ...(codes.length ? { productID: codes[0] } : {}),
+    ...(cover ? { image: coverUrl(cover, 600, 'jpg') } : {}),
     ...(jans.length ? { gtin13: jans[0] } : {}),
     inLanguage: 'ja',
   };
 
-  return layout({ title: `${primary}${ja ? ` (${ja})` : ''}, ${platform.short_name} | Tana 棚`, desc, canonical, body, jsonld, platformColor: platform.color });
+  return layout({ title: `${primary}${ja ? ` (${ja})` : ''}, ${platform.short_name} | Tana 棚`, desc, canonical, body, jsonld, platformColor: platform.color,
+    ...(cover ? { ogImage: coverUrl(cover, 600, 'jpg'), ogPortrait: true } : {}) });
 }
 
 function platformPage(p, games) {
@@ -524,26 +529,28 @@ location.replace(n ? '/#/my9/u/' + n[1] + '/' + n[2] : m ? '/#/u/' + m[1] : '/')
 // /my9/<username>/<slot>/     a member's grid: its own preview picture (grid.png), then on to the app
 const MY9_PROMPTS = { made: ['The 9 games that made me', '私を構成する9本'], childhood: ['9 games from my childhood', '子どもの頃の9本'], jponly: ['9 Japan-only gems', '日本でしか出なかった9本'],
   fire: ['9 games I’d save from a fire', '火事でも持ち出す9本'], year: ['My 9 of the year', '今年の9本'], comfort: ['9 comfort games', '心が落ち着く9本'] };
-const PRINT_ACC = ['#B4452A', '#C9A13B', '#2C4A7E', '#2E6A4E', '#E8DCC2', '#7A3E6E'];
-function seedOf(s) { let h = 2166136261; for (const ch of String(s)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
-// The same emblem the app prints for each release (keep in step with printEmblem in the app)
-function printEmblem(id, c) {
-  const s = seedOf(id), m = s % 12, a = PRINT_ACC[(s >> 4) % 6], b = PRINT_ACC[((s >> 8) % 5 + 1 + ((s >> 4) % 6)) % 6], t = (s >> 12) % 4;
-  const shapes = [
-    `<circle cx="50" cy="50" r="34" fill="${a}"/><rect x="16" y="50" width="68" height="34" fill="${c}"/><circle cx="50" cy="50" r="12" fill="#F4EFE4"/>`,
-    `<rect x="14" y="14" width="72" height="72" fill="${c}"/><polygon points="50,${20 + t * 3} 80,80 20,80" fill="${a}"/><circle cx="50" cy="58" r="9" fill="#F4EFE4"/>`,
-    `<circle cx="50" cy="50" r="36" fill="none" stroke="${c}" stroke-width="7"/><circle cx="50" cy="50" r="22" fill="none" stroke="${a}" stroke-width="7"/><circle cx="50" cy="50" r="8" fill="${b}"/>`,
-    `<rect x="18" y="14" width="64" height="72" fill="${b}"/><rect x="30" y="26" width="40" height="48" fill="${c}"/><rect x="${36 + t * 3}" y="14" width="16" height="72" fill="${a}"/>`,
-    `<circle cx="50" cy="${40 + t * 2}" r="26" fill="${a}"/><path d="M8 72 Q29 56 50 72 T92 72 V92 H8Z" fill="${c}"/><path d="M8 82 Q29 66 50 82 T92 82" fill="none" stroke="#F4EFE4" stroke-width="3"/>`,
-    [0, 1, 2, 3, 4].map(k => `<rect x="${12 + k * 16}" y="${18 + (k % 2) * 10}" width="10" height="${64 - (k % 2) * 20}" fill="${k % 2 ? a : c}"/>`).join(''),
-    `<polygon points="50,10 90,50 50,90 10,50" fill="${c}"/><polygon points="50,28 72,50 50,72 28,50" fill="${a}"/>${t > 1 ? '<circle cx="50" cy="50" r="6" fill="#F4EFE4"/>' : ''}`,
-    `<rect x="12" y="12" width="38" height="76" fill="#1D1B17"/><rect x="50" y="12" width="38" height="76" fill="#F4EFE4" stroke="#1D1B17" stroke-width="2"/><circle cx="50" cy="50" r="18" fill="${a}"/>`,
-    `<circle cx="50" cy="52" r="34" fill="${c}"/>${[0, 1, 2, 3, 4, 5].map(k => `<circle cx="${(50 + 22 * Math.cos(k + t)).toFixed(1)}" cy="${(52 + 22 * Math.sin(k + t)).toFixed(1)}" r="7" fill="${k % 2 ? a : b}"/>`).join('')}`,
-    `${[0, 1, 2, 3].map(k => `<rect x="${14 + k * 9}" y="${14 + k * 9}" width="${72 - k * 18}" height="${72 - k * 18}" fill="${[c, a, '#F4EFE4', b][k]}"/>`).join('')}`,
-    `<path d="M10 80 L35 30 L50 55 L62 38 L90 80Z" fill="${c}"/><circle cx="${70 - t * 6}" cy="28" r="11" fill="${a}"/><rect x="10" y="80" width="80" height="6" fill="${b}"/>`,
-    `${[0, 1, 2].map(r => [0, 1, 2].map(q => `<rect x="${16 + q * 24}" y="${16 + r * 24}" width="20" height="20" fill="${(q + r + t) % 3 === 0 ? a : (q + r) % 2 ? c : '#F4EFE4'}"/>`).join('')).join('')}`,
-  ];
-  return shapes[m];
+// Box art: the same sources and proxy as the app (libretro-thumbnails, Wikipedia, members' photos through wsrv.nl)
+const SUPA_PUBLIC = `${process.env.SUPABASE_URL || ''}/storage/v1/object/public/photos/`;
+function coverUrl(cov, w = 320, fmt = 'webp') {
+  if (!cov || !cov.p || cov.s === 'none') return '';
+  let origin;
+  if (cov.s === 'libretro') { const i = cov.p.indexOf('/'); origin = `https://raw.githubusercontent.com/libretro-thumbnails/${cov.p.slice(0, i)}/master/Named_Boxarts/${encodeURIComponent(cov.p.slice(i + 1))}.png`; }
+  else if (cov.s === 'member') origin = SUPA_PUBLIC + cov.p;
+  else origin = cov.p;
+  return `https://wsrv.nl/?url=${encodeURIComponent(origin)}&w=${w}&output=${fmt}&q=82&we`;
+}
+// Fetched once per build for the share pictures: { href, w, h } with the PNG inlined
+const COVER_CACHE = new Map();
+async function coverData(cov) {
+  let url = coverUrl(cov, 480, 'png'); if (!url) return null;
+  if (process.env.COVERS_DIRECT) url = decodeURIComponent(url.slice(url.indexOf('url=') + 4, url.indexOf('&w=')));   // offline tests: skip the proxy
+  if (COVER_CACHE.has(url)) return COVER_CACHE.get(url);
+  let out = null;
+  try {
+    const res = await fetch(url, { headers: { 'User-Agent': 'TanaPages/1.0 (+https://tana.gamingjapanese.com)' } });
+    if (res.ok) { const buf = Buffer.from(await res.arrayBuffer()); if (buf.length > 24 && buf.readUInt32BE(12) === 0x49484452) out = { href: `data:image/png;base64,${buf.toString('base64')}`, w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) }; }
+  } catch { out = null; }
+  COVER_CACHE.set(url, out); return out;
 }
 const PRINT_FACE = { smallbox: [0.8, 0.62, 'card'], famicom: [0.8, 0.66, 'card'], cartbox: [0.72, 0.84, 'card'], hucard: [0.76, 0.64, 'card'], aes: [0.72, 0.9, 'card'],
   bigbox: [0.74, 0.9, 'card'], jewel: [0.88, 0.72, 'jewel'], dvd: [0.7, 0.9, 'dvd'], switchcase: [0.62, 0.84, 'dvd'], umd: [0.6, 0.78, 'dvd'], handheld: [0.82, 0.7, 'dvd'] };
@@ -556,20 +563,35 @@ function wrapWords(t, perLine, lines) {
   if (out.length > lines) { const k = out.slice(0, lines); k[lines - 1] = clip(k[lines - 1], perLine - 1) + '…'; return k; }
   return out;
 }
+function regTag(c, x, y, s) {
+  return REG_TAG[c.reg] ? `<rect x="${x - 21 * s}" y="${y}" width="${16 * s}" height="${11 * s}" fill="#F4EFE4" stroke="#000" stroke-opacity=".3" stroke-width=".6"/><text x="${x - 13 * s}" y="${y + 8.5 * s}" text-anchor="middle" font-family="Inter" font-weight="600" font-size="${(7.5 * s).toFixed(1)}" fill="${REG_INK[c.reg]}">${c.reg}</text>` : '';
+}
 function printSvg(c, x, y, cw, lang) {
   const [asp, size, kind] = faceOf(c), fh = Math.round(cw * Math.min(0.9, size * 1.04)), fw = Math.round(fh * asp), s = fw / 100;
+  const art = c.covData;
+  if (art) {
+    // Real box art, in its own proportions, bottom-centred where the face would sit
+    const r = art.w / art.h; let h = fh, w = h * r; if (w > cw * 0.92) { w = cw * 0.92; h = w / r; }
+    const ax = x + (cw - w) / 2, ay = y + cw - cw * 0.05 - h, ts = Math.min(w, h * 0.75) / 100;
+    return `<g><rect x="${ax + 3 * s}" y="${ay + 6 * s}" width="${w}" height="${h}" fill="#000" fill-opacity=".35"/>
+<image x="${ax}" y="${ay}" width="${w}" height="${h}" preserveAspectRatio="none" href="${art.href}"/>
+${regTag(c, ax + w, ay + 5 * ts, ts)}
+<rect x="${ax + 0.5}" y="${ay + 0.5}" width="${w - 1}" height="${h - 1}" fill="none" stroke="#000" stroke-opacity=".18"/></g>`;
+  }
   const fx = x + (cw - fw) / 2, fy = y + cw - cw * 0.05 - fh, col = c.c || '#5E6675';
-  const obi = kind === 'jewel' && c.reg === 'JP' ? fw * 0.12 : 0, x0 = fx + obi, w0 = fw - obi, bandH = 18 * s, ttlH = 36 * s, artH = fh - bandH - ttlH, es = Math.min(w0 * 0.8, artH - 10 * s);
-  const main = lang === 'ja' && c.ja ? c.ja : c.t, ja = isJa(main), lines = wrapWords(main || '', Math.max(4, Math.floor(w0 / (11.5 * s * (ja ? 1.05 : 0.6)))), 2);
+  const obi = kind === 'jewel' && c.reg === 'JP' ? fw * 0.12 : 0, x0 = fx + obi, w0 = fw - obi, bandH = 18 * s;
+  const main = lang === 'ja' && c.ja ? c.ja : c.t, sub = lang === 'ja' && c.ja ? c.t : c.ja, ja = isJa(main);
+  const lines = wrapWords(main || '', Math.max(4, Math.floor((w0 - 16 * s) / (14 * s * (ja ? 1.0 : 0.55)))), 4), lh = 15.5 * s;
+  const subLine = sub && sub !== main ? sub : '', subH = subLine ? 13 * s : 0, ty = fy + fh - 12 * s - subH - (lines.length - 1) * lh;
   return `<g><rect x="${fx + 3 * s}" y="${fy + 6 * s}" width="${fw}" height="${fh}" fill="#000" fill-opacity=".35"/>
 <rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="#F4EFE4"/>
 <rect x="${x0}" y="${fy}" width="${w0}" height="${bandH}" fill="${esc(col)}"/>
 <text x="${x0 + 7 * s}" y="${fy + bandH / 2 + 3 * s}" font-family="Inter" font-weight="600" font-size="${(8 * s).toFixed(1)}" letter-spacing="${(1 * s).toFixed(1)}" fill="#FFFFFF">${esc(clip(c.pn || '', Math.floor(w0 / (6 * s))))}</text>
-<rect x="${x0}" y="${fy + bandH}" width="${w0}" height="${artH}" fill="${mixTo(col, '#F4EFE4', 0.84)}"/>
-<svg x="${x0 + (w0 - es) / 2}" y="${fy + bandH + (artH - es) / 2}" width="${es}" height="${es}" viewBox="0 0 100 100">${printEmblem(c.id, col)}</svg>
-<rect x="${x0}" y="${fy + fh - ttlH}" width="${w0}" height="${ttlH}" fill="#FBF8F2"/><rect x="${x0}" y="${fy + fh - ttlH}" width="${w0}" height="${2 * s}" fill="${esc(col)}"/>
-${lines.map((l, k) => `<text x="${x0 + 7 * s}" y="${fy + fh - ttlH + 15 * s + k * 12.5 * s}" font-family="${ja ? 'Shippori Mincho B1' : 'Libre Caslon Text'}" font-weight="700" font-size="${(11 * s).toFixed(1)}" fill="#1D1B17">${esc(l)}</text>`).join('')}
-${REG_TAG[c.reg] ? `<rect x="${fx + fw - 21 * s}" y="${fy + bandH + 4 * s}" width="${16 * s}" height="${11 * s}" fill="#F4EFE4"/><text x="${fx + fw - 13 * s}" y="${fy + bandH + 12.5 * s}" text-anchor="middle" font-family="Inter" font-weight="600" font-size="${(7.5 * s).toFixed(1)}" fill="${REG_INK[c.reg]}">${c.reg}</text>` : ''}
+<rect x="${x0}" y="${fy + bandH}" width="${w0}" height="${fh - bandH}" fill="${mixTo(col, '#F4EFE4', 0.9)}"/>
+<rect x="${x0}" y="${fy + fh - 5 * s}" width="${w0}" height="${5 * s}" fill="${esc(col)}"/>
+${lines.map((l, k) => `<text x="${x0 + 8 * s}" y="${ty + k * lh}" font-family="${ja ? 'Shippori Mincho B1' : 'Libre Caslon Text'}" font-weight="700" font-size="${(14 * s).toFixed(1)}" fill="#1D1B17">${esc(l)}</text>`).join('')}
+${subLine ? `<text x="${x0 + 8 * s}" y="${fy + fh - 12 * s}" font-family="${isJa(subLine) ? 'Shippori Mincho B1' : 'Inter'}" font-size="${(8 * s).toFixed(1)}" fill="#6B675E">${esc(clip(subLine, Math.floor((w0 - 16 * s) / ((isJa(subLine) ? 8.4 : 4.4) * s))))}</text>` : ''}
+${regTag(c, fx + fw, fy + bandH + 4 * s, s)}
 ${obi ? `<rect x="${fx}" y="${fy}" width="${obi}" height="${fh}" fill="#FBF8F2"/><rect x="${fx}" y="${fy + fh * 0.58}" width="${obi}" height="${fh * 0.16}" fill="#B4452A"/>` : ''}
 <rect x="${fx + 0.5}" y="${fy + 0.5}" width="${fw - 1}" height="${fh - 1}" fill="none" stroke="#000" stroke-opacity=".18"/></g>`;
 }
@@ -625,9 +647,15 @@ function my9Landing() {
 <p class="actions"><a class="btn primary" href="${SITE}/#/my9">Make your My 9</a> <a class="btn" href="${SITE}/#/my9/census">See the census</a></p></section>` });
 }
 // A sample for the invitation card when nobody has a public grid yet
-const MY9_SAMPLE = [['sfc', 'JP', 'Chrono Trigger', 'クロノ・トリガー', 7], ['n64', 'JP', 'Super Mario 64', 'スーパーマリオ64', 8], ['gb', 'JP', 'Pokémon Red', 'ポケットモンスター赤', 8],
-  ['ps1', 'JP', 'Final Fantasy VII', 'ファイナルファンタジーVII', 9], ['sfc', 'JP', 'EarthBound', 'MOTHER2 ギーグの逆襲', 6], ['ss', 'JP', 'Radiant Silvergun', 'レイディアント シルバーガン', 10],
-  ['ps1', 'JP', 'Metal Gear Solid', 'メタルギアソリッド', 10], ['dc', 'JP', 'Ikaruga', '斑鳩', 14], ['ps2', 'JP', 'Katamari Damacy', '塊魂', 16]];
+const MY9_SAMPLE = [['sfc', 'JP', 'Chrono Trigger', 'クロノ・トリガー', 7, 'Nintendo_-_Super_Nintendo_Entertainment_System/Chrono Trigger (Japan)'],
+  ['n64', 'JP', 'Super Mario 64', 'スーパーマリオ64', 8, 'Nintendo_-_Nintendo_64/Super Mario 64 (Japan)'],
+  ['gb', 'JP', 'Pokémon Red', 'ポケットモンスター赤', 8, 'Nintendo_-_Game_Boy/Pocket Monsters - Aka (Japan) (Rev 1) (SGB Enhanced)'],
+  ['ps1', 'JP', 'Final Fantasy VII', 'ファイナルファンタジーVII', 9, 'Sony_-_PlayStation/Final Fantasy VII (Japan)'],
+  ['sfc', 'JP', 'EarthBound', 'MOTHER2 ギーグの逆襲', 6, 'Nintendo_-_Super_Nintendo_Entertainment_System/Mother 2 - Gyiyg no Gyakushuu (Japan)'],
+  ['ss', 'JP', 'Radiant Silvergun', 'レイディアント シルバーガン', 10, 'Sega_-_Saturn/Radiant Silvergun (Japan)'],
+  ['ps1', 'JP', 'Metal Gear Solid', 'メタルギアソリッド', 10, 'Sony_-_PlayStation/Metal Gear Solid (Japan)'],
+  ['dc', 'JP', 'Ikaruga', '斑鳩', 14, 'Sega_-_Dreamcast/Ikaruga (Japan)'],
+  ['ps2', 'JP', 'Katamari Damacy', '塊魂', 16, 'Sony_-_PlayStation_2/Katamari Damacy (Japan) (v2.00)']];
 async function buildMy9(platforms) {
   const grids = SAMPLE ? JSON.parse(await readFile(join(SAMPLE, 'my9.json'), 'utf8').catch(() => '[]')) : await rpc('pages_my9', {}).catch(e => { console.warn('My 9 pages skipped:', e.message); return null; });
   if (!grids) return;
@@ -641,10 +669,11 @@ async function buildMy9(platforms) {
   const png = svg => new Resvg(svg, { fitTo: { mode: 'width', value: 1200 }, font: { fontFiles, loadSystemFonts: false, defaultFontFamily: 'Inter' } }).render().asPng();
   await mkdir(join(OUT, 'my9'), { recursive: true });
   await writeIfChanged(join(OUT, 'my9', 'index.html'), my9Landing());
+  if (Resvg) for (const g of grids) for (const c of g.cells || []) if (c && c.cov) c.covData = await coverData(c.cov);
   const best = grids.slice().sort((a, b) => (b.cells || []).filter(Boolean).length - (a.cells || []).filter(Boolean).length)[0];
   const sample = best && (best.cells || []).filter(Boolean).length >= 9 ? best : { prompt: 'made', lang: 'en', plates: 'age', style: 'wood:walnut',
-    cells: MY9_SAMPLE.map(([pf, reg, t, ja, age], k) => { const p = platforms.get(pf) || {}; return { id: `sample-${k}-${t}`, pf, c: p.color, pn: p.name_en, m: p.media, reg, t, ja, age }; }) };
-  if (Resvg) await writeBinIfChanged(join(OUT, 'my9', 'card.png'), png(my9Svg(sample, true)));
+    cells: MY9_SAMPLE.map(([pf, reg, t, ja, age, path], k) => { const p = platforms.get(pf) || {}; return { id: `sample-${k}-${t}`, pf, c: p.color, pn: p.name_en, m: p.media, reg, t, ja, age, cov: { s: 'libretro', p: path, a: reg } }; }) };
+  if (Resvg) { for (const c of sample.cells) if (c && c.cov && !c.covData) c.covData = await coverData(c.cov); await writeBinIfChanged(join(OUT, 'my9', 'card.png'), png(my9Svg(sample, true))); }
   const keep = new Set(['index.html', 'card.png']);
   let pages = 0;
   for (const g of grids) {

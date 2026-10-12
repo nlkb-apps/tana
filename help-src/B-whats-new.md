@@ -9,9 +9,15 @@ updated: 2026-10-12
 
 # What's new
 
+## 2026-10-12: Box art
+
+Games now show their real box art: on game pages, next to every release, in search results, in My 9 and in the pictures you share. More than three quarters of all releases have it already, matched by product code where possible. Each box keeps a small JP, NA or EU patch for the region of the release, so it's clear which one you're looking at even when the art comes from another region.
+
+Games with no art yet show a plain label with the title. An approved photo of the front of your copy fills it in, and you can report wrong box art from the game page. See Box art for where it comes from.
+
 ## 2026-10-12: My 9 · 私を構成する9本
 
-Make the grid of the nine games that made you, on a 3 by 3 cubby shelf. Pick the exact version you played, add your age or the year and a line about why, and put your keystone game in the middle. Every release on Tana has its own Tana print, so all 40,000 or so games look right in a grid.
+Make the grid of the nine games that made you, on a 3 by 3 cubby shelf. Pick the exact version you played, add your age or the year and a line about why, and put your keystone game in the middle. Each game shows its box art.
 
 Anyone can build one at tana.gamingjapanese.com/my9/ without an account. Saving, sharing a link and comparing with other people need a free account, and Tana keeps your grid while you sign up. The census shows what everyone is picking, Japan and North America side by side. See My 9 for how it all works.
 

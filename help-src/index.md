@@ -23,6 +23,7 @@ Welcome to the Tana help pages. Whether you're setting up your first shelf or tr
 - [2.3 Reading a game page](2-3-game-pages.md)
 - [2.4 Regions and stamps](2-4-regions-and-stamps.md)
 - [2.5 Editions explained](2-5-editions.md)
+- [2.6 Box art](2-6-box-art.md)
 
 ## 3. Your collection
 

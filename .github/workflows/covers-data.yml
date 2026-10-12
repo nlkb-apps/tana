@@ -1,0 +1,37 @@
+name: Refresh box art candidates
+
+# Weekly: list every box-art file in libretro-thumbnails and the serials in libretro-database,
+# and publish cands.json on the covers-data branch. The database loads it on Monday (covers_load)
+# and the nightly covers_refresh matches it to releases.
+on:
+  schedule:
+    - cron: "0 15 * * 0"   # Monday 00:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build candidates
+        run: python3 scripts/covers-cands.py "$RUNNER_TEMP/covers"
+      - name: Publish to the covers-data branch
+        run: |
+          git config user.name "tana-pages[bot]"
+          git config user.email "tana-pages@users.noreply.github.com"
+          git fetch --depth 1 origin covers-data
+          git worktree add "$RUNNER_TEMP/cd" origin/covers-data
+          cp "$RUNNER_TEMP/covers/out/cands.json" "$RUNNER_TEMP/cd/cands.json"
+          cd "$RUNNER_TEMP/cd"
+          git add cands.json
+          if git diff --cached --quiet; then echo "No change"; exit 0; fi
+          git commit -m "Box art candidates $(date -u +%F)"
+          git push origin HEAD:covers-data
