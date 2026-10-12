@@ -9,6 +9,12 @@ updated: 2026-10-13
 
 # What's new
 
+## 2026-10-13: Today's Box · 今日の一箱
+
+A new daily game. Every day at midnight Japan time, one box opens for everyone as an 8-bit mosaic. Guess the game in six tries, and each miss sharpens the box and adds a clue. Then the bonus round: the same game's Japanese and Western boxes, pixelated. Which is Japan's?
+
+Every day you play earns a stamp on the month's stamp card. Stamp a whole month and its brass plate goes under your shelf. Share your result without spoiling the answer, and see how the people you follow did. No account needed to play: tana.gamingjapanese.com/box/. See Today's Box for how it works.
+
 ## 2026-10-13: Box art for PS3, Switch and newer consoles
 
 Box art now covers far more of the catalogue. PS3 and Switch games get their real boxes for each region, matched by product code where Tana has one, and PS4, PS5, Xbox 360 and Xbox One games mostly have art too. Games filed under a capitalised or catalogue-style title ("Elder Scrolls V, The - Skyrim"), special editions and games known by their Japanese name now find their art, and when the same game is filed once per platform, the entries share it. Nintendo Switch 2 Editions use the Switch box until they have their own.

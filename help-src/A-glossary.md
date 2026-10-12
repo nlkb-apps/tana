@@ -15,6 +15,8 @@ updated: 2026-10-12
 - Copy: one physical copy you own of an edition
 - Main shelf: everything in your collection
 - Box: one of nine numbered lists of any games from the catalogue, owned or not, under Wants & lists
+- Today's Box (今日の一箱): the daily game of guessing a game from its box, shown as a mosaic that sharpens with each guess
+- Plate: a brass plate under your shelf for stamping every Today's Box in a month
 - Census: the running count of every public My 9: most picked games, keystones, platforms and eras
 - Keystone: the game in the middle cubby of a My 9
 - My 9 (私を構成する9本): a 3 by 3 grid of the nine games that define you, kept in one of your boxes

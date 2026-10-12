@@ -7,6 +7,7 @@
 // Env: SUPABASE_URL, SUPABASE_ANON_KEY, SITE_URL (default https://tana.gamingjapanese.com),
 //      OUT_DIR (default .), SAMPLE_DIR (offline test: reads platforms.json + games.json)
 
+import zlib from 'node:zlib';
 import { mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
@@ -351,6 +352,7 @@ async function main() {
   await writeIfChanged(join(OUT, '.nojekyll'), '');
   await buildProfiles();
   await buildMy9(platforms);
+  await buildBox();
 
   console.log(`${works.size} games, ${platformsRaw.length} platforms, ${written} game pages changed, ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 }
@@ -691,6 +693,96 @@ async function buildMy9(platforms) {
     else await rm(join(OUT, 'my9', d), { recursive: true, force: true });
   }
   console.log(`${grids.length} public My 9 grids, ${pages} pages changed`);
+}
+
+// ---------- Today's Box (/box/): the share link, with today's opening mosaic as its preview picture ----------
+function boxLanding(t) {
+  const title = t ? `今日の一箱 No. ${t.no} · Today's Box | Tana` : `今日の一箱 · Today's Box | Tana`;
+  const desc = `Guess today's game from its box, revealed one 8-bit mosaic at a time. Then pick which box is Japan's. One box a day for everyone, free.`;
+  return layout({ title, desc, canonical: `${SITE}/box/`, ogImage: `${SITE}/box/card.png`, noindex: false,
+    body: `<script>location.replace('/#/box' + location.search);</script>
+<section class="profile"><p class="crumb">A daily game on Tana</p><h1><span lang="ja">今日の一箱</span> Today's Box</h1>
+<p class="lede">${esc(desc)}</p>
+<p class="actions"><a class="btn primary" href="${SITE}/#/box">Play today's box</a></p></section>` });
+}
+// A tiny PNG (8-bit RGB, RGBA or palette, not interlaced) into rows of pixels, so the mosaic can be drawn as crisp squares
+function decodePng(buf) {
+  let p = 8, w = 0, h = 0, type = 0, depth = 0, pal = null; const idat = [];
+  while (p < buf.length) {
+    const len = buf.readUInt32BE(p), kind = buf.toString('ascii', p + 4, p + 8), d = buf.subarray(p + 8, p + 8 + len);
+    if (kind === 'IHDR') { w = d.readUInt32BE(0); h = d.readUInt32BE(4); depth = d[8]; type = d[9]; if (d[12]) return null; }
+    else if (kind === 'PLTE') pal = d; else if (kind === 'IDAT') idat.push(d); else if (kind === 'IEND') break;
+    p += 12 + len;
+  }
+  if (depth !== 8 || ![2, 3, 6].includes(type)) return null;
+  const bpp = type === 6 ? 4 : type === 2 ? 3 : 1, raw = zlib.inflateSync(Buffer.concat(idat)), stride = w * bpp, out = Buffer.alloc(h * stride);
+  for (let y = 0; y < h; y++) {
+    const f = raw[y * (stride + 1)], src = raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1));
+    for (let x = 0; x < stride; x++) {
+      const a = x >= bpp ? out[y * stride + x - bpp] : 0, b = y ? out[(y - 1) * stride + x] : 0, c = x >= bpp && y ? out[(y - 1) * stride + x - bpp] : 0;
+      let v = src[x];
+      if (f === 1) v += a; else if (f === 2) v += b; else if (f === 3) v += (a + b) >> 1;
+      else if (f === 4) { const pp = a + b - c, pa = Math.abs(pp - a), pb = Math.abs(pp - b), pc = Math.abs(pp - c); v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c; }
+      out[y * stride + x] = v & 255;
+    }
+  }
+  const px = (x, y) => { const i = y * stride + x * bpp; return type === 3 ? [pal[out[i] * 3], pal[out[i] * 3 + 1], pal[out[i] * 3 + 2]] : [out[i], out[i + 1], out[i + 2]]; };
+  return { w, h, px };
+}
+function boxCardSvg(t, img) {
+  const W = 1200, H = 630, S = 470, X = 70, Y = 80;
+  let art = '';
+  const m = img && img.buf ? decodePng(img.buf) : null;
+  if (m) {
+    const r = m.w / m.h; let h = S - 70, w = h * r; if (w > S - 70) { w = S - 70; h = w / r; }
+    const x0 = X + (S - w) / 2, y0 = Y + (S - h) / 2, cw = w / m.w, ch = h / m.h, cells = [];
+    for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) { const [R, G, B] = m.px(x, y); cells.push(`<rect x="${(x0 + x * cw).toFixed(2)}" y="${(y0 + y * ch).toFixed(2)}" width="${(cw + .6).toFixed(2)}" height="${(ch + .6).toFixed(2)}" fill="rgb(${R},${G},${B})"/>`); }
+    art = `<rect x="${x0 + 5}" y="${y0 + 9}" width="${w}" height="${h}" fill="#000" fill-opacity=".45"/>${cells.join('')}`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+<rect width="${W}" height="${H}" fill="#ECEBE6"/>
+<defs><linearGradient id="fr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B5E3C"/><stop offset=".4" stop-color="#6E4529"/><stop offset="1" stop-color="#4E3020"/></linearGradient>
+<linearGradient id="sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>
+<rect x="${X - 18 + 6}" y="${Y - 18 + 16}" width="${S + 36}" height="${S + 36}" fill="#000" fill-opacity=".22"/>
+<rect x="${X - 18}" y="${Y - 18}" width="${S + 36}" height="${S + 36}" rx="4" fill="url(#fr)"/>
+<rect x="${X}" y="${Y}" width="${S}" height="${S}" fill="#2A1C12"/><rect x="${X}" y="${Y}" width="${S}" height="${S * 0.3}" fill="url(#sh)"/>
+${art}
+<text x="640" y="150" font-family="Inter" font-weight="600" font-size="18" letter-spacing="3" fill="#6B675E">TODAY'S BOX${t ? ` · No. ${t.no}` : ''}</text>
+<text x="640" y="232" font-family="Shippori Mincho B1" font-weight="700" font-size="72" fill="#1D1B17">今日の一箱</text>
+<text x="640" y="300" font-family="Libre Caslon Text" font-weight="700" font-size="34" fill="#1D1B17">What game is this box?</text>
+<text x="640" y="350" font-family="Inter" font-size="23" fill="#5D5A52">Six tries. Each miss sharpens the box.</text>
+<text x="640" y="384" font-family="Inter" font-size="23" fill="#5D5A52">Then: which box is Japan's?</text>
+${t && t.pn ? `<rect x="640" y="418" width="${18 + t.pn.length * 11.5}" height="38" rx="4" fill="#F7F6F2" stroke="#1D1B17" stroke-width="1.5"/><rect x="654" y="432" width="10" height="10" rx="2" fill="${esc(t.color || '#5E6675')}"/><text x="672" y="443" font-family="Inter" font-weight="600" font-size="17" fill="#1D1B17">${esc(t.pn)}</text>` : ''}
+<rect x="640" y="548" width="7" height="26" rx="1" fill="#B4452A"/><rect x="650" y="542" width="7" height="32" rx="1" fill="#2C4A7E"/><rect x="660" y="552" width="7" height="22" rx="1" fill="#2E6A4E"/>
+<text x="678" y="572" font-family="Libre Caslon Text" font-weight="700" font-size="26" fill="#1D1B17">Tana</text>
+<text x="1130" y="572" text-anchor="end" font-family="Inter" font-size="19" fill="#6B675E">tana.gamingjapanese.com/box</text>
+</svg>`;
+}
+async function buildBox() {
+  let t = null, img = null;
+  if (!SAMPLE) {
+    t = await rpc('daily_box_today', {}).catch(e => { console.warn('Today\'s Box skipped:', e.message); return null; });
+    if (t) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/daily-box?d=${t.day}&s=1`);
+        if (res.ok) { const buf = Buffer.from(await res.arrayBuffer()); if (buf.readUInt32BE(12) === 0x49484452) img = { buf }; }
+      } catch { img = null; }
+    }
+  } else {
+    t = { no: 1, pn: 'Super Famicom', color: '#6E5BA8' };
+    try { img = { buf: await readFile(join(SAMPLE, 'box.png')) }; } catch { img = null; }
+  }
+  await mkdir(join(OUT, 'box'), { recursive: true });
+  await writeIfChanged(join(OUT, 'box', 'index.html'), boxLanding(t));
+  let Resvg = null, fontFiles = [];
+  try {
+    ({ Resvg } = await import('@resvg/resvg-js'));
+    const req = createRequire(import.meta.url);
+    fontFiles = ['@expo-google-fonts/libre-caslon-text/700Bold/LibreCaslonText_700Bold.ttf', '@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf',
+                 '@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf', '@expo-google-fonts/shippori-mincho-b1/700Bold/ShipporiMinchoB1_700Bold.ttf'].map(f => req.resolve(f));
+  } catch { Resvg = null; }
+  if (Resvg) await writeBinIfChanged(join(OUT, 'box', 'card.png'), new Resvg(boxCardSvg(t, img), { fitTo: { mode: 'width', value: 1200 }, font: { fontFiles, loadSystemFonts: false, defaultFontFamily: 'Inter' } }).render().asPng());
+  console.log(`Today's Box page${t ? ` (No. ${t.no})` : ''}${img ? ' with its mosaic' : ''}`);
 }
 
 async function writeBinIfChanged(path, buf) {

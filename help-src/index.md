@@ -58,6 +58,7 @@ Welcome to the Tana help pages. Whether you're setting up your first shelf or tr
 - [6.5 The leaderboard and verified games](6-5-leaderboard.md)
 - [6.6 The contribution orb](6-6-contribution-orb.md)
 - [6.7 Comments and discussion](6-7-comments.md)
+- [6.8 Today's Box · 今日の一箱](6-8-todays-box.md)
 
 ## 7. Improving the catalogue
 
