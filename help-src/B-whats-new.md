@@ -9,6 +9,12 @@ updated: 2026-10-12
 
 # What's new
 
+## 2026-10-12: My 9 · 私を構成する9本
+
+Make the grid of the nine games that made you, on a 3 by 3 cubby shelf. Pick the exact version you played, add your age or the year and a line about why, and put your keystone game in the middle. Every release on Tana has its own Tana print, so all 40,000 or so games look right in a grid.
+
+Anyone can build one at tana.gamingjapanese.com/my9/ without an account. Saving, sharing a link and comparing with other people need a free account, and Tana keeps your grid while you sign up. The census shows what everyone is picking, Japan and North America side by side. See My 9 for how it all works.
+
 ## 2026-10-12: Wants and lists, with nine boxes
 
 Wants is now Wants & lists. Your wantlist is drawn as a shelf, with an Order menu and a green tick on anything you already own. Next to it you have nine boxes, numbered like the boxes in a Pokémon PC, for any games at all, owned or not: what to play next, what you finished this year, a series you're following, your shopping list for the next trip.

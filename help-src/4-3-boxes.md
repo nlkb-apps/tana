@@ -36,7 +36,7 @@ The arrows on either side of the box's name step to the previous and next box, s
 
 ## Renaming, moving and deleting
 
-Rename, move or delete lets you change the name and the note, or move the box to another empty number. Deleting a box only deletes the list. Nothing changes in your collection or on your wantlist.
+Rename, move or delete lets you change the name and the note, or move the box to another empty number. Tick Make it a 3×3 grid there to turn the box into a My 9 (see My 9). Deleting a box only deletes the list. Nothing changes in your collection or on your wantlist.
 
 ## Who sees them
 

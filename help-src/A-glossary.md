@@ -15,6 +15,10 @@ updated: 2026-10-12
 - Copy: one physical copy you own of an edition
 - Main shelf: everything in your collection
 - Box: one of nine numbered lists of any games from the catalogue, owned or not, under Wants & lists
+- Census: the running count of every public My 9: most picked games, keystones, platforms and eras
+- Keystone: the game in the middle cubby of a My 9
+- My 9 (私を構成する9本): a 3 by 3 grid of the nine games that define you, kept in one of your boxes
+- Tana print: the cover Tana draws for every release, from its platform's colours and a pattern unique to it
 - Smaller shelf: one of up to five shelves of games you pick from your collection, with its own name, order and style
 - Serial / product code: the code on the spine, disc or cartridge, i.e. SLPS-00700
 - JAN: the Japanese barcode number on the box

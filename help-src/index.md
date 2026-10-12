@@ -40,6 +40,7 @@ Welcome to the Tana help pages. Whether you're setting up your first shelf or tr
 - [4.1 Your wantlist](4-1-wantlist.md)
 - [4.2 Wants matches](4-2-wants-matches.md)
 - [4.3 Boxes](4-3-boxes.md)
+- [4.4 My 9 · 私を構成する9本](4-4-my9.md)
 
 ## 5. Photos
 

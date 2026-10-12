@@ -345,6 +345,7 @@ async function main() {
   await writeIfChanged(join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
   await writeIfChanged(join(OUT, '.nojekyll'), '');
   await buildProfiles();
+  await buildMy9(platforms);
 
   console.log(`${works.size} games, ${platformsRaw.length} platforms, ${written} game pages changed, ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 }
@@ -513,10 +514,154 @@ const NOT_FOUND = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Tana</title><meta name="robots" content="noindex">
 <script>
 // Share links for members whose page has not been built yet (pages are built nightly) open the app instead
-var m = location.pathname.match(/^\\/u\\/([^\\/]+)/);
-location.replace(m ? '/#/u/' + m[1] : '/');
+var m = location.pathname.match(/^\\/u\\/([^\\/]+)/), n = location.pathname.match(/^\\/my9\\/([^\\/]+)\\/(\\d)/);
+location.replace(n ? '/#/my9/u/' + n[1] + '/' + n[2] : m ? '/#/u/' + m[1] : '/');
 </script></head><body><p><a href="/">Tana</a></p></body></html>
 `;
+
+// ---------- My 9 (私を構成する9本) ----------
+// /my9/                       the invitation: what it is, a sample grid, straight on to the maker in the app
+// /my9/<username>/<slot>/     a member's grid: its own preview picture (grid.png), then on to the app
+const MY9_PROMPTS = { made: ['The 9 games that made me', '私を構成する9本'], childhood: ['9 games from my childhood', '子どもの頃の9本'], jponly: ['9 Japan-only gems', '日本でしか出なかった9本'],
+  fire: ['9 games I’d save from a fire', '火事でも持ち出す9本'], year: ['My 9 of the year', '今年の9本'], comfort: ['9 comfort games', '心が落ち着く9本'] };
+const PRINT_ACC = ['#B4452A', '#C9A13B', '#2C4A7E', '#2E6A4E', '#E8DCC2', '#7A3E6E'];
+function seedOf(s) { let h = 2166136261; for (const ch of String(s)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+// The same emblem the app prints for each release (keep in step with printEmblem in the app)
+function printEmblem(id, c) {
+  const s = seedOf(id), m = s % 12, a = PRINT_ACC[(s >> 4) % 6], b = PRINT_ACC[((s >> 8) % 5 + 1 + ((s >> 4) % 6)) % 6], t = (s >> 12) % 4;
+  const shapes = [
+    `<circle cx="50" cy="50" r="34" fill="${a}"/><rect x="16" y="50" width="68" height="34" fill="${c}"/><circle cx="50" cy="50" r="12" fill="#F4EFE4"/>`,
+    `<rect x="14" y="14" width="72" height="72" fill="${c}"/><polygon points="50,${20 + t * 3} 80,80 20,80" fill="${a}"/><circle cx="50" cy="58" r="9" fill="#F4EFE4"/>`,
+    `<circle cx="50" cy="50" r="36" fill="none" stroke="${c}" stroke-width="7"/><circle cx="50" cy="50" r="22" fill="none" stroke="${a}" stroke-width="7"/><circle cx="50" cy="50" r="8" fill="${b}"/>`,
+    `<rect x="18" y="14" width="64" height="72" fill="${b}"/><rect x="30" y="26" width="40" height="48" fill="${c}"/><rect x="${36 + t * 3}" y="14" width="16" height="72" fill="${a}"/>`,
+    `<circle cx="50" cy="${40 + t * 2}" r="26" fill="${a}"/><path d="M8 72 Q29 56 50 72 T92 72 V92 H8Z" fill="${c}"/><path d="M8 82 Q29 66 50 82 T92 82" fill="none" stroke="#F4EFE4" stroke-width="3"/>`,
+    [0, 1, 2, 3, 4].map(k => `<rect x="${12 + k * 16}" y="${18 + (k % 2) * 10}" width="10" height="${64 - (k % 2) * 20}" fill="${k % 2 ? a : c}"/>`).join(''),
+    `<polygon points="50,10 90,50 50,90 10,50" fill="${c}"/><polygon points="50,28 72,50 50,72 28,50" fill="${a}"/>${t > 1 ? '<circle cx="50" cy="50" r="6" fill="#F4EFE4"/>' : ''}`,
+    `<rect x="12" y="12" width="38" height="76" fill="#1D1B17"/><rect x="50" y="12" width="38" height="76" fill="#F4EFE4" stroke="#1D1B17" stroke-width="2"/><circle cx="50" cy="50" r="18" fill="${a}"/>`,
+    `<circle cx="50" cy="52" r="34" fill="${c}"/>${[0, 1, 2, 3, 4, 5].map(k => `<circle cx="${(50 + 22 * Math.cos(k + t)).toFixed(1)}" cy="${(52 + 22 * Math.sin(k + t)).toFixed(1)}" r="7" fill="${k % 2 ? a : b}"/>`).join('')}`,
+    `${[0, 1, 2, 3].map(k => `<rect x="${14 + k * 9}" y="${14 + k * 9}" width="${72 - k * 18}" height="${72 - k * 18}" fill="${[c, a, '#F4EFE4', b][k]}"/>`).join('')}`,
+    `<path d="M10 80 L35 30 L50 55 L62 38 L90 80Z" fill="${c}"/><circle cx="${70 - t * 6}" cy="28" r="11" fill="${a}"/><rect x="10" y="80" width="80" height="6" fill="${b}"/>`,
+    `${[0, 1, 2].map(r => [0, 1, 2].map(q => `<rect x="${16 + q * 24}" y="${16 + r * 24}" width="20" height="20" fill="${(q + r + t) % 3 === 0 ? a : (q + r) % 2 ? c : '#F4EFE4'}"/>`).join('')).join('')}`,
+  ];
+  return shapes[m];
+}
+const PRINT_FACE = { smallbox: [0.8, 0.62, 'card'], famicom: [0.8, 0.66, 'card'], cartbox: [0.72, 0.84, 'card'], hucard: [0.76, 0.64, 'card'], aes: [0.72, 0.9, 'card'],
+  bigbox: [0.74, 0.9, 'card'], jewel: [0.88, 0.72, 'jewel'], dvd: [0.7, 0.9, 'dvd'], switchcase: [0.62, 0.84, 'dvd'], umd: [0.6, 0.78, 'dvd'], handheld: [0.82, 0.7, 'dvd'] };
+const faceOf = c => PRINT_FACE[BOX_OF[c.pf] || (c.m === 'disc' ? 'jewel' : c.m === 'floppy' ? 'bigbox' : 'cartbox')] || PRINT_FACE.cartbox;
+const mixTo = (a, b, t) => { const x = hexRgb(a), y = hexRgb(b); return rgbHex(x.map((v, k) => v + (y[k] - v) * t)); };
+function wrapWords(t, perLine, lines) {
+  const words = isJa(t) ? [...t] : String(t).split(/\s+/), out = []; let cur = '';
+  for (const w of words) { const n = cur ? cur + (isJa(t) ? '' : ' ') + w : w; if ([...n].length <= perLine || !cur) cur = n; else { out.push(cur); cur = w; } }
+  if (cur) out.push(cur);
+  if (out.length > lines) { const k = out.slice(0, lines); k[lines - 1] = clip(k[lines - 1], perLine - 1) + '…'; return k; }
+  return out;
+}
+function printSvg(c, x, y, cw, lang) {
+  const [asp, size, kind] = faceOf(c), fh = Math.round(cw * Math.min(0.9, size * 1.04)), fw = Math.round(fh * asp), s = fw / 100;
+  const fx = x + (cw - fw) / 2, fy = y + cw - cw * 0.05 - fh, col = c.c || '#5E6675';
+  const obi = kind === 'jewel' && c.reg === 'JP' ? fw * 0.12 : 0, x0 = fx + obi, w0 = fw - obi, bandH = 18 * s, ttlH = 36 * s, artH = fh - bandH - ttlH, es = Math.min(w0 * 0.8, artH - 10 * s);
+  const main = lang === 'ja' && c.ja ? c.ja : c.t, ja = isJa(main), lines = wrapWords(main || '', Math.max(4, Math.floor(w0 / (11.5 * s * (ja ? 1.05 : 0.6)))), 2);
+  return `<g><rect x="${fx + 3 * s}" y="${fy + 6 * s}" width="${fw}" height="${fh}" fill="#000" fill-opacity=".35"/>
+<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="#F4EFE4"/>
+<rect x="${x0}" y="${fy}" width="${w0}" height="${bandH}" fill="${esc(col)}"/>
+<text x="${x0 + 7 * s}" y="${fy + bandH / 2 + 3 * s}" font-family="Inter" font-weight="600" font-size="${(8 * s).toFixed(1)}" letter-spacing="${(1 * s).toFixed(1)}" fill="#FFFFFF">${esc(clip(c.pn || '', Math.floor(w0 / (6 * s))))}</text>
+<rect x="${x0}" y="${fy + bandH}" width="${w0}" height="${artH}" fill="${mixTo(col, '#F4EFE4', 0.84)}"/>
+<svg x="${x0 + (w0 - es) / 2}" y="${fy + bandH + (artH - es) / 2}" width="${es}" height="${es}" viewBox="0 0 100 100">${printEmblem(c.id, col)}</svg>
+<rect x="${x0}" y="${fy + fh - ttlH}" width="${w0}" height="${ttlH}" fill="#FBF8F2"/><rect x="${x0}" y="${fy + fh - ttlH}" width="${w0}" height="${2 * s}" fill="${esc(col)}"/>
+${lines.map((l, k) => `<text x="${x0 + 7 * s}" y="${fy + fh - ttlH + 15 * s + k * 12.5 * s}" font-family="${ja ? 'Shippori Mincho B1' : 'Libre Caslon Text'}" font-weight="700" font-size="${(11 * s).toFixed(1)}" fill="#1D1B17">${esc(l)}</text>`).join('')}
+${REG_TAG[c.reg] ? `<rect x="${fx + fw - 21 * s}" y="${fy + bandH + 4 * s}" width="${16 * s}" height="${11 * s}" fill="#F4EFE4"/><text x="${fx + fw - 13 * s}" y="${fy + bandH + 12.5 * s}" text-anchor="middle" font-family="Inter" font-weight="600" font-size="${(7.5 * s).toFixed(1)}" fill="${REG_INK[c.reg]}">${c.reg}</text>` : ''}
+${obi ? `<rect x="${fx}" y="${fy}" width="${obi}" height="${fh}" fill="#FBF8F2"/><rect x="${fx}" y="${fy + fh * 0.58}" width="${obi}" height="${fh * 0.16}" fill="#B4452A"/>` : ''}
+<rect x="${fx + 0.5}" y="${fy + 0.5}" width="${fw - 1}" height="${fh - 1}" fill="none" stroke="#000" stroke-opacity=".18"/></g>`;
+}
+function cubbySvg(g, X, Y, cw) {
+  const pal = shelfPalette(g.style), gap = cw * 0.075, pad = cw * 0.085, W = cw * 3 + gap * 2 + pad * 2;
+  const cells = (g.cells || []).map((c, k) => {
+    const cx = X + pad + (k % 3) * (cw + gap), cy = Y + pad + Math.floor(k / 3) * (cw + gap);
+    const plate = c && g.plates !== 'none' ? (g.plates === 'year' ? (c.year || c.y || '') : (c.age ? `Age ${c.age}` : '')) : '';
+    return `<rect x="${cx}" y="${cy}" width="${cw}" height="${cw}" fill="${pal.back}"/><rect x="${cx}" y="${cy}" width="${cw}" height="${cw * 0.3}" fill="url(#n9shade)"/>
+${k === 4 ? `<rect x="${cx + 1.5}" y="${cy + 1.5}" width="${cw - 3}" height="${cw - 3}" fill="url(#n9glow)" stroke="#C9A13B" stroke-width="3"/>` : ''}
+${c ? printSvg(c, cx, cy, cw, g.lang) : `<rect x="${cx + cw * 0.18}" y="${cy + cw * 0.15}" width="${cw * 0.64}" height="${cw * 0.7}" fill="none" stroke="#FFFFFF" stroke-opacity=".25" stroke-width="2" stroke-dasharray="6 5"/>`}
+${plate ? `<rect x="${cx + cw / 2 - cw * 0.17}" y="${cy + cw + gap / 2 - cw * 0.037}" width="${cw * 0.34}" height="${cw * 0.075}" fill="#E4CF9C"/><text x="${cx + cw / 2}" y="${cy + cw + gap / 2 + cw * 0.022}" text-anchor="middle" font-family="Inter" font-weight="600" font-size="${(cw * 0.05).toFixed(1)}" fill="#3A2716">${esc(`${k + 1} · ${plate}`)}</text>` : ''}`;
+  }).join('\n');
+  return `<defs><linearGradient id="n9frame" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pal.hi}"/><stop offset=".3" stop-color="${pal.frame}"/><stop offset="1" stop-color="${pal.lo}"/></linearGradient>
+<linearGradient id="n9shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+<radialGradient id="n9glow" cx=".5" cy=".3" r=".6"><stop offset="0" stop-color="#FFD682" stop-opacity=".3"/><stop offset="1" stop-color="#FFD682" stop-opacity="0"/></radialGradient></defs>
+<rect x="${X + 6}" y="${Y + 18}" width="${W}" height="${W}" fill="#000" fill-opacity=".25"/><rect x="${X}" y="${Y}" width="${W}" height="${W}" rx="4" fill="url(#n9frame)"/>
+${cells}`;
+}
+function my9Svg(g, invite) {
+  const W = 1200, H = 630, cw = 165, title = (MY9_PROMPTS[g.prompt] || MY9_PROMPTS.made)[g.lang === 'ja' ? 1 : 0], ja = isJa(title);
+  const tl = wrapWords(title, ja ? 11 : 20, 3);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+<rect width="${W}" height="${H}" fill="#ECEBE6"/>
+${cubbySvg(g, 50, 40, cw)}
+<text x="660" y="96" font-family="Inter" font-weight="600" font-size="18" letter-spacing="2" fill="#6B675E">MY 9 · 私を構成する9本</text>
+${tl.map((l, k) => `<text x="660" y="${158 + k * 60}" font-family="${ja ? 'Shippori Mincho B1' : 'Libre Caslon Text'}" font-weight="700" font-size="50" fill="#1D1B17">${esc(l)}</text>`).join('')}
+<text x="660" y="${158 + tl.length * 60 + 4}" font-family="Inter" font-weight="400" font-size="26" fill="#5D5A52">${esc(invite ? 'Make yours on Tana. No account needed.' : clip(g.name, 30))}</text>
+<text x="660" y="540" font-family="Inter" font-weight="400" font-size="19" fill="#6B675E">#私を構成する9本 #My9Games</text>
+<rect x="660" y="562" width="7" height="26" rx="1" fill="#B4452A"/><rect x="670" y="556" width="7" height="32" rx="1" fill="#2C4A7E"/><rect x="680" y="566" width="7" height="22" rx="1" fill="#2E6A4E"/>
+<text x="698" y="586" font-family="Libre Caslon Text" font-weight="700" font-size="26" fill="#1D1B17">Tana</text>
+<text x="1150" y="586" text-anchor="end" font-family="Inter" font-weight="400" font-size="19" fill="#6B675E">tana.gamingjapanese.com/my9</text>
+</svg>`;
+}
+// The page behind a shared link: real content for previews and search, then straight on to the app.
+function my9Page(g) {
+  const url = `${SITE}/my9/${encodeURIComponent(g.username)}/${g.slot}/`, app = `${SITE}/#/my9/u/${encodeURIComponent(g.username)}/${g.slot}`;
+  const [en, ja] = MY9_PROMPTS[g.prompt] || MY9_PROMPTS.made;
+  const list = (g.cells || []).filter(Boolean);
+  return layout({ title: `${g.name}: ${en} | My 9 on Tana`, desc: `${list.map(c => c.t).join(', ')}. ${ja}.`, canonical: url, noindex: true,
+    ogImage: `${SITE}/my9/${encodeURIComponent(g.username)}/${g.slot}/grid.png`,
+    body: `<script>location.replace(${JSON.stringify(app)});</script>
+<section class="profile"><p class="crumb">My 9 · <span lang="ja">私を構成する9本</span></p><h1>${esc(g.name)}: ${esc(en)}</h1>
+<ol>${list.map(c => `<li>${esc(c.t)}${c.ja && c.ja !== c.t ? ` <span lang="ja">${esc(c.ja)}</span>` : ''}${c.note ? `: ${esc(c.note)}` : ''}</li>`).join('')}</ol>
+<p class="actions"><a class="btn primary" href="${esc(app)}">Open it on Tana</a> <a class="btn" href="${SITE}/#/my9">Make your own</a></p></section>` });
+}
+function my9Landing() {
+  return layout({ title: 'My 9 · 私を構成する9本 | Tana', desc: 'The nine games that made you, on one shelf. Pick the exact version you played, when it got you and why, and get a picture ready to post. Free, no account needed.',
+    canonical: `${SITE}/my9/`, ogImage: `${SITE}/my9/card.png`,
+    body: `<script>location.replace('/#/my9' + location.search);</script>
+<section class="profile"><p class="crumb">New on Tana</p><h1>My 9 <span lang="ja">私を構成する9本</span></h1>
+<p class="lede">The nine games that made you, on one shelf. Pick the exact version you played, when it got you and why, and get a picture ready to post. Free, no account needed.</p>
+<p class="actions"><a class="btn primary" href="${SITE}/#/my9">Make your My 9</a> <a class="btn" href="${SITE}/#/my9/census">See the census</a></p></section>` });
+}
+// A sample for the invitation card when nobody has a public grid yet
+const MY9_SAMPLE = [['sfc', 'JP', 'Chrono Trigger', 'クロノ・トリガー', 7], ['n64', 'JP', 'Super Mario 64', 'スーパーマリオ64', 8], ['gb', 'JP', 'Pokémon Red', 'ポケットモンスター赤', 8],
+  ['ps1', 'JP', 'Final Fantasy VII', 'ファイナルファンタジーVII', 9], ['sfc', 'JP', 'EarthBound', 'MOTHER2 ギーグの逆襲', 6], ['ss', 'JP', 'Radiant Silvergun', 'レイディアント シルバーガン', 10],
+  ['ps1', 'JP', 'Metal Gear Solid', 'メタルギアソリッド', 10], ['dc', 'JP', 'Ikaruga', '斑鳩', 14], ['ps2', 'JP', 'Katamari Damacy', '塊魂', 16]];
+async function buildMy9(platforms) {
+  const grids = SAMPLE ? JSON.parse(await readFile(join(SAMPLE, 'my9.json'), 'utf8').catch(() => '[]')) : await rpc('pages_my9', {}).catch(e => { console.warn('My 9 pages skipped:', e.message); return null; });
+  if (!grids) return;
+  let Resvg = null, fontFiles = [];
+  try {
+    ({ Resvg } = await import('@resvg/resvg-js'));
+    const req = createRequire(import.meta.url);
+    fontFiles = ['@expo-google-fonts/libre-caslon-text/700Bold/LibreCaslonText_700Bold.ttf', '@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf',
+                 '@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf', '@expo-google-fonts/shippori-mincho-b1/700Bold/ShipporiMinchoB1_700Bold.ttf'].map(f => req.resolve(f));
+  } catch { Resvg = null; }
+  const png = svg => new Resvg(svg, { fitTo: { mode: 'width', value: 1200 }, font: { fontFiles, loadSystemFonts: false, defaultFontFamily: 'Inter' } }).render().asPng();
+  await mkdir(join(OUT, 'my9'), { recursive: true });
+  await writeIfChanged(join(OUT, 'my9', 'index.html'), my9Landing());
+  const best = grids.slice().sort((a, b) => (b.cells || []).filter(Boolean).length - (a.cells || []).filter(Boolean).length)[0];
+  const sample = best && (best.cells || []).filter(Boolean).length >= 9 ? best : { prompt: 'made', lang: 'en', plates: 'age', style: 'wood:walnut',
+    cells: MY9_SAMPLE.map(([pf, reg, t, ja, age], k) => { const p = platforms.get(pf) || {}; return { id: `sample-${k}-${t}`, pf, c: p.color, pn: p.name_en, m: p.media, reg, t, ja, age }; }) };
+  if (Resvg) await writeBinIfChanged(join(OUT, 'my9', 'card.png'), png(my9Svg(sample, true)));
+  const keep = new Set(['index.html', 'card.png']);
+  let pages = 0;
+  for (const g of grids) {
+    if (!/^[a-z0-9_.-]{1,40}$/i.test(g.username) || !(g.slot >= 1 && g.slot <= 9)) continue;
+    const u = g.username.toLowerCase(), dir = join(OUT, 'my9', u, String(g.slot));
+    keep.add(u);
+    await mkdir(dir, { recursive: true });
+    if (await writeIfChanged(join(dir, 'index.html'), my9Page(g))) pages++;
+    if (Resvg) await writeBinIfChanged(join(dir, 'grid.png'), png(my9Svg(g, false)));
+  }
+  // Grids deleted, emptied or made private lose their pages
+  for (const d of await readdir(join(OUT, 'my9')).catch(() => [])) {
+    if (keep.has(d)) { if (d !== 'index.html' && d !== 'card.png') for (const s of await readdir(join(OUT, 'my9', d)).catch(() => [])) { if (!grids.some(g => g.username.toLowerCase() === d && String(g.slot) === s)) await rm(join(OUT, 'my9', d, s), { recursive: true, force: true }); } }
+    else await rm(join(OUT, 'my9', d), { recursive: true, force: true });
+  }
+  console.log(`${grids.length} public My 9 grids, ${pages} pages changed`);
+}
 
 async function writeBinIfChanged(path, buf) {
   try { const old = await readFile(path); if (Buffer.compare(old, buf) === 0) return false; } catch {}
