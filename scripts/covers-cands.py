@@ -73,9 +73,15 @@ def get(url, tries=3):
     try: return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60).read().decode('utf-8', 'replace')
     except Exception as e: err = e
   print('skip', url, err); return ''
+import time
+T0 = time.time(); BUDGET = float(os.environ.get('GAMETDB_BUDGET_MIN', '45')) * 60
 def head(url):
+  # a one-byte GET: works whether or not the server answers HEAD
+  if time.time() - T0 > BUDGET: return None
   try:
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA, method='HEAD'), timeout=30) as r: return r.status == 200
+    req = urllib.request.Request(url, headers={**UA, 'Range': 'bytes=0-0'})
+    with urllib.request.urlopen(req, timeout=8) as r: return r.status in (200, 206)
+  except urllib.error.HTTPError as e: return False
   except Exception: return False
 def tdb(db, lang):
   out = {}
@@ -84,7 +90,7 @@ def tdb(db, lang):
     i, t = line.split(' = ', 1); out[i.strip()] = t.strip()
   return out
 LETTER = {'E': ['NA'], 'J': ['JP'], 'K': ['KR'], 'W': ['AS'], 'A': ['NA', 'EU', 'JP']}
-FOLDERS = {'NA': ['US'], 'JP': ['JA'], 'KR': ['KO'], 'AS': ['ZH', 'EN'], 'EU': ['EN', 'FR', 'DE', 'ES', 'IT', 'NL', 'AU']}
+FOLDERS = {'NA': ['US'], 'JP': ['JA'], 'KR': ['KO'], 'AS': ['ZH', 'EN'], 'EU': ['EN', 'FR', 'DE']}
 def letter_regs(c): return LETTER.get(c, ['EU'])
 PS3P = {'BLUS': 'NA', 'BCUS': 'NA', 'BLES': 'EU', 'BCES': 'EU', 'BLJM': 'JP', 'BLJS': 'JP', 'BCJS': 'JP', 'BCJM': 'JP', 'BLJB': 'JP', 'BCJB': 'JP', 'BLAS': 'AS', 'BCAS': 'AS', 'BLKS': 'KR', 'BCKS': 'KR'}
 DBS = [  # db, art dir, extension, how to read the region, Tana platform for an id
@@ -103,12 +109,20 @@ for db, art, ext, regs_of, pf_of in DBS:
     if not re.fullmatch(r'[A-Z0-9]{4,10}', i): continue
     for reg in regs_of(i):
       checks.append((db, art, ext, i, reg, t, ja.get(i, ''), pf_of(i)))
+# the games most likely to be on Tana first: retail PS3, then Switch, Wii, DS, 3DS, Wii U; eShop/WiiWare-style ids last
+order = {'ps3tdb': 0, 'switchtdb': 1, 'wiitdb': 2, 'dstdb': 3, '3dstdb': 4, 'wiiutdb': 5}
+checks.sort(key=lambda c: (order[c[0]], {'NA': 0, 'JP': 1, 'EU': 2}.get(c[4], 3)))
+done = [0]
 def probe(c):
   db, art, ext, i, reg, t, tj, pf = c
+  done[0] += 1
+  if done[0] % 5000 == 0: print(done[0], 'checked', int(time.time() - T0), 's', flush=True)
   for f in FOLDERS[reg]:
-    if head(f'https://art.gametdb.com/{art}/cover/{f}/{i}.{ext}'): return (c, f)
+    ok = head(f'https://art.gametdb.com/{art}/cover/{f}/{i}.{ext}')
+    if ok is None: return None
+    if ok: return (c, f)
   return None
-with ThreadPoolExecutor(24) as ex: found = [x for x in ex.map(probe, checks) if x]
+with ThreadPoolExecutor(64) as ex: found = [x for x in ex.map(probe, checks) if x]
 for (db, art, ext, i, reg, t, tj, pf), f in found:
   keys = {'S:' + i}
   if pf in ('wii', 'gc', 'wiiu'): keys.add('G:' + i[:4])
