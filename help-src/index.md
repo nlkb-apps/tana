@@ -3,7 +3,7 @@ title: Tana help
 slug: index
 order: 0
 status: ready
-updated: 2026-10-05
+updated: 2026-10-12
 ---
 
 # Tana help
@@ -33,6 +33,7 @@ Welcome to the Tana help pages. Whether you're setting up your first shelf or tr
 - [3.5 Exporting your collection](3-5-exporting.md)
 - [3.6 Insights](3-6-insights.md)
 - [3.7 Value](3-7-value.md)
+- [3.8 Smaller shelves](3-8-smaller-shelves.md)
 
 ## 4. Wants
 

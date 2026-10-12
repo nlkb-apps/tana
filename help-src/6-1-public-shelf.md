@@ -4,7 +4,7 @@ slug: public-shelf
 section: Sharing and community
 order: 6.1
 status: ready
-updated: 2026-10-11
+updated: 2026-10-12
 ---
 
 # Your public shelf and privacy
@@ -16,3 +16,5 @@ A public collection can be shared, followed, and shows up by name in wants match
 Either way, your notes and prices are always private, and adult titles never show up on share pages.
 
 Visitors see your shelf in the order you chose (see Shelf view and list view), including your own arrangement. They can switch the order for themselves with the Order menu, but that doesn't change anything on your end. The share page and its picture follow your order from the next nightly update.
+
+Visitors also see your shelf style and your smaller shelves (only the ones with games on them). See Smaller shelves.

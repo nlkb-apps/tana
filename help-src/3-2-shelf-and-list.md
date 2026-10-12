@@ -4,7 +4,7 @@ slug: shelf-and-list
 section: Your collection
 order: 3.2
 status: ready
-updated: 2026-10-11
+updated: 2026-10-12
 ---
 
 # Shelf view and list view
@@ -42,6 +42,19 @@ Tap Arrange, then drag any box to where you want it. On a phone, press on a box 
 The order saves as you go. The first time you move a box, the shelf switches to My own order, starting from whatever order it was in, so you don't have to start from scratch. If you want a fresh start, Start over from… lays the shelf out by console, release date, title, series, region or date added, and you can keep arranging from there. Tap Done when you're finished.
 
 You can arrange a single platform too: pick it from the platform buttons, arrange, and the rest of your shelf stays where it was. New games you add go at the end of your own order.
+
+## Shelf style
+
+Your shelf doesn't have to be oak. Tap Style above the shelf and pick what it's made of:
+
+- Wood: oak, walnut, cherry, teak, keyaki, mahogany, maple, hinoki, whitewashed or ebony, each with its own grain
+- Metal: brushed steel, chrome, black iron, gunmetal, brass, bronze or copper, standing on a pegboard back
+- Lacquer: a glossy finish in vermilion, bengara red, black, amber, pine green, indigo, gold or plum
+- Paint: a flat coat in one of 18 colors
+
+For lacquer and paint you can also mix your own color with Mix your own colour. The picture at the top of the window shows your own boxes in the new finish as you go, so you can try a few before you tap Save. Back to the original oak puts it back the way it was.
+
+The style is saved to your account and visitors see it too, on your shelf in the app, on your share page and in the shelf picture. Each smaller shelf can have a style of its own (see Smaller shelves).
 
 At the top of your collection you'll see your numbers at a glance: games, platforms, how many are Japan-only, and how many are complete in box.
 

@@ -9,6 +9,12 @@ updated: 2026-10-12
 
 # What's new
 
+## 2026-10-12: Shelf styles and smaller shelves
+
+You can now choose what your shelf is made of. Tap Style above the shelf for ten woods (from oak and walnut to hinoki and ebony), seven metals, glossy lacquer or paint, in a long list of colors or one you mix yourself. Visitors see it too, on your shelf, your share page and the shelf picture.
+
+You can also make up to five smaller shelves next to your main one: your favourites, what you're playing, your grails. Each has its own name, style and order, and you pick the games from your collection. They show up in a row above your shelf, and on your share page under the main shelf. See Smaller shelves for how it works.
+
 ## 2026-10-12: The Discord server is open
 
 When you join the Tana Discord, it now asks what you collect and which platforms you want to hear about, then shows you the channels for them. You can change your picks any time in Channels & Roles. The invite link is now discord.gg/MXWmYAhxUs and doesn't expire; the old link stops working at the end of October.

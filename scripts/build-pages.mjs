@@ -380,7 +380,39 @@ function clip(t, max) { const a = [...String(t || '')]; return a.length > max ? 
 // Region sticker on each box (cream label, region ink), as in the app
 const REG_TAG = { JP: 'JP', NA: 'NA', EU: 'EU', KR: 'KR', AS: 'AS', BR: 'BR' };
 const REG_INK = { JP: '#B4452A', NA: '#2C4A7E', EU: '#2E6A4E', KR: '#7A3E6E', AS: '#8C6A14', BR: '#2E6A4E' };
+// A member's shelf style (same codes and colours as the app): wood:<species>, metal:<finish>, paint:#rrggbb, lacquer:#rrggbb.
+const SHELF_FINISHES = {
+  wood: { oak: ['#A8764A', '#C39162', '#75492A', '#3D2B1E'], walnut: ['#6E4A33', '#8A6249', '#4B3021', '#24170F'], cherry: ['#9E5434', '#BC7050', '#6F3720', '#38190F'],
+    teak: ['#9A6A3A', '#B58454', '#6E4824', '#3A2614'], keyaki: ['#B27A44', '#CC965F', '#83552B', '#43291A'], mahogany: ['#7C3526', '#97493A', '#56221A', '#2A100C'],
+    maple: ['#D6B784', '#E8CFA3', '#B39265', '#6E583C'], hinoki: ['#E2CB9C', '#EFDDB7', '#C2A877', '#86734F'], whitewash: ['#D9D0C3', '#EAE3D8', '#B6AB9B', '#978C7D'],
+    ebony: ['#2F2723', '#4A3E36', '#1C1714', '#110D0B'] },
+  metal: { steel: ['#9BA2A9', '#CDD2D7', '#6B7279', '#363B40'], chrome: ['#C4C9CE', '#F4F6F8', '#888F96', '#43494F'], iron: ['#3B3D40', '#5E6165', '#232527', '#151618'],
+    gunmetal: ['#50565D', '#767D85', '#33383D', '#1C1F23'], brass: ['#B8913F', '#E0C474', '#86672A', '#352C20'], bronze: ['#8C6239', '#B08458', '#5F4024', '#2B2018'],
+    copper: ['#B26C47', '#D9946D', '#7C462A', '#33221B'] },
+};
+const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const rgbHex = a => '#' + a.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('').toUpperCase();
+const mixHex = (a, b, t) => { const x = hexRgb(a), y = hexRgb(b); return rgbHex(x.map((v, k) => v + (y[k] - v) * t)); };
+const lumHex = h => { const [r, g, b] = hexRgb(h).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }); return .2126 * r + .7152 * g + .0722 * b; };
+function shelfPalette(code) {
+  let m = /^(wood|metal):([a-z]+)$/.exec(code || '') || /^(paint|lacquer):(#[0-9a-f]{6})$/i.exec(code || '');
+  if (!m || (SHELF_FINISHES[m[1]] && !SHELF_FINISHES[m[1]][m[2]])) m = [null, 'wood', 'oak'];
+  const mat = m[1]; let frame, hi, lo, back;
+  if (SHELF_FINISHES[mat]) [frame, hi, lo, back] = SHELF_FINISHES[mat][m[2]];
+  else {
+    frame = m[2].toUpperCase(); const L = lumHex(frame);
+    hi = mixHex(frame, '#FFFFFF', mat === 'lacquer' ? .26 : .18); lo = mixHex(frame, '#000000', .26);
+    back = mat === 'lacquer' ? mixHex(frame, '#000000', .55) : mixHex(frame, '#000000', L > .55 ? .16 : L > .25 ? .3 : .48);
+  }
+  return { mat, frame, hi, lo, back, styled: !!code && m[0] !== null, ink: lumHex(back) > .3 ? '#2A2622' : '#E9DFD2' };
+}
+// Inline colours for an HTML case; no style keeps the stylesheet's oak (which dims in dark mode).
+function caseStyle(code) {
+  const p = shelfPalette(code);
+  return p.styled ? ` m-${p.mat}" style="--oak:${p.frame};--oak-hi:${p.hi};--oak-lo:${p.lo};--walnut:${p.back};--shelf-ink:${p.ink}` : '';
+}
 function shelfSvg(p) {
+  const pal = shelfPalette(p.style);
   const W = 1200, H = 630, S = 1.6, left = 64, right = 1136, top = 262, floor = 566, inner = right - left - 28 - 20;
   const books = []; let used = 0, prev = null, more = 0;
   const all = p.books || [], total = Math.max(p.editions || 0, all.length);
@@ -408,7 +440,10 @@ ${REG_TAG[b.reg] ? `<rect x="${cx - 12}" y="${y + 11}" width="24" height="14" rx
   const name = clip(p.display_name, 28);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
 <defs><linearGradient id="gloss" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".24"/><stop offset=".26" stop-color="#FFFFFF" stop-opacity=".05"/><stop offset=".56" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity=".3"/></linearGradient>
-<linearGradient id="plank" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C39162"/><stop offset=".2" stop-color="#A8764A"/><stop offset=".7" stop-color="#A8764A"/><stop offset="1" stop-color="#75492A"/></linearGradient>
+<linearGradient id="plank" x1="0" y1="0" x2="0" y2="1">${pal.mat === 'metal'
+  ? `<stop offset="0" stop-color="${pal.hi}"/><stop offset=".28" stop-color="${pal.frame}"/><stop offset=".5" stop-color="${pal.lo}"/><stop offset=".76" stop-color="${pal.frame}"/><stop offset="1" stop-color="${pal.hi}"/>`
+  : `<stop offset="0" stop-color="${pal.hi}"/><stop offset=".2" stop-color="${pal.frame}"/><stop offset=".7" stop-color="${pal.frame}"/><stop offset="1" stop-color="${pal.lo}"/>`}</linearGradient>
+<pattern id="peg" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="8" cy="8" r="2" fill="#000000" fill-opacity=".45"/></pattern>
 <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000000" stop-opacity=".4"/><stop offset="1" stop-color="#000000" stop-opacity="0"/></linearGradient></defs>
 <rect width="${W}" height="${H}" fill="#ECEBE6"/>
 <rect x="${left}" y="54" width="7" height="30" rx="1" fill="#B4452A"/><rect x="${left + 10}" y="48" width="7" height="36" rx="1" fill="#2C4A7E"/><rect x="${left + 20}" y="58" width="7" height="26" rx="1" fill="#2E6A4E"/>
@@ -416,13 +451,14 @@ ${REG_TAG[b.reg] ? `<rect x="${cx - 12}" y="${y + 11}" width="24" height="14" rx
 <text x="${right}" y="82" text-anchor="end" font-family="Inter" font-weight="400" font-size="20" fill="#6B675E">tana.gamingjapanese.com</text>
 <text x="${left}" y="170" font-family="Libre Caslon Text" font-weight="700" font-size="58" fill="#1D1B17">${esc(name)}’s shelf</text>
 <text x="${left}" y="218" font-family="Inter" font-weight="400" font-size="26" fill="#5D5A52">${esc(statsLine(p))}</text>
-<rect x="${left}" y="${top - 12}" width="${right - left}" height="12" fill="#75492A"/>
-<rect x="${left}" y="${top}" width="${right - left}" height="${floor - top}" fill="#3D2B1E"/>
+<rect x="${left}" y="${top - 12}" width="${right - left}" height="12" fill="${pal.lo}"/>
+<rect x="${left}" y="${top}" width="${right - left}" height="${floor - top}" fill="${pal.back}"/>
+${pal.mat === 'metal' ? `<rect x="${left}" y="${top}" width="${right - left}" height="${floor - top}" fill="url(#peg)"/>` : ''}
 <rect x="${left + 14}" y="${top}" width="${right - left - 28}" height="34" fill="url(#shade)"/>
-<rect x="${left}" y="${top}" width="14" height="${floor - top + 22}" fill="#75492A"/><rect x="${right - 14}" y="${top}" width="14" height="${floor - top + 22}" fill="#75492A"/>
+<rect x="${left}" y="${top}" width="14" height="${floor - top + 22}" fill="${pal.lo}"/><rect x="${right - 14}" y="${top}" width="14" height="${floor - top + 22}" fill="${pal.lo}"/>
 ${spines}
 <rect x="${left}" y="${floor}" width="${right - left}" height="22" fill="url(#plank)"/>
-${more ? `<text x="${right - 24}" y="${floor - 14}" text-anchor="end" font-family="Inter" font-weight="600" font-size="18" fill="#E9DFD2">+ ${Number(more).toLocaleString('en-US')} more</text>` : ''}
+${more ? `<text x="${right - 24}" y="${floor - 14}" text-anchor="end" font-family="Inter" font-weight="600" font-size="18" fill="${pal.ink}">+ ${Number(more).toLocaleString('en-US')} more</text>` : ''}
 </svg>`;
 }
 
@@ -450,8 +486,10 @@ function profilePage(p) {
   <h1>${esc(p.display_name)}’s shelf</h1>
   <p class="lede">${esc(statsLine(p))}</p>
   ${p.bio ? `<p class="bio">${esc(p.bio)}</p>` : ''}
-  <div class="pcase">${shelfHtml(p.books || []) || '<p class="pcase-empty">The shelf is empty for now.</p>'}</div>
+  <div class="pcase${caseStyle(p.style)}">${shelfHtml(p.books || []) || '<p class="pcase-empty">The shelf is empty for now.</p>'}</div>
   ${(p.editions || 0) > (p.books || []).length ? `<p class="muted">Showing ${(p.books || []).length} of ${Number(p.editions).toLocaleString('en-US')} editions.</p>` : ''}
+  ${(p.subs || []).filter(x => (x.books || []).length).map(x => `<h2 class="psub-h"><a href="${SITE}/#/u/${encodeURIComponent(p.username)}?shelf=${encodeURIComponent(x.id)}">${esc(x.name)}</a> <span>${Number(x.n).toLocaleString('en-US')}</span></h2>
+  <div class="pcase psub${caseStyle(x.style || p.style)}">${shelfHtml(x.books || [])}</div>`).join('\n  ')}
   <p class="actions"><a class="btn primary" href="${SITE}/#/u/${encodeURIComponent(p.username)}">Open the full collection</a> <a class="btn" href="${SITE}/">Start your own shelf</a></p>
 </section>`;
   return layout({ title, desc, canonical: url, body, ogImage: `${SITE}/u/${encodeURIComponent(p.username)}/shelf.png`, noindex: true });
@@ -466,7 +504,7 @@ function embedPage(p) {
 <link rel="stylesheet" href="${SITE}/static/pages.css"></head>
 <body class="embed"><a class="embed-card" href="${SITE}/u/${encodeURIComponent(p.username)}/" target="_blank" rel="noopener">
 <span class="embed-head"><strong>${esc(p.display_name)}’s shelf</strong> <span>${esc(statsLine(p))}</span></span>
-<span class="pcase one">${shelfHtml(books, 40, 4000)}</span>
+<span class="pcase one${caseStyle(p.style)}">${shelfHtml(books, 40, 4000)}</span>
 <span class="embed-foot">View on Tana</span></a></body></html>
 `;
 }
