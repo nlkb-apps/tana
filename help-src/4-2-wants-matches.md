@@ -1,10 +1,10 @@
 ---
 title: Wants matches
 slug: wants-matches
-section: Wants
+section: Wants and lists
 order: 4.2
 status: ready
-updated: 2026-09-29
+updated: 2026-10-12
 ---
 
 # Wants matches

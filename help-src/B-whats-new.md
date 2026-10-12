@@ -9,6 +9,12 @@ updated: 2026-10-12
 
 # What's new
 
+## 2026-10-12: Wants and lists, with nine boxes
+
+Wants is now Wants & lists. Your wantlist is drawn as a shelf, with an Order menu and a green tick on anything you already own. Next to it you have nine boxes, numbered like the boxes in a Pokémon PC, for any games at all, owned or not: what to play next, what you finished this year, a series you're following, your shopping list for the next trip.
+
+Each box has its own name, note, order and style. Fill a box by searching inside it, or tap Add to a box on any game page. Visitors to a public collection can see the wantlist and boxes under a new Wants & lists tab on the profile. See Boxes for how it all works.
+
 ## 2026-10-12: Shelf styles and smaller shelves
 
 You can now choose what your shelf is made of. Tap Style above the shelf for ten woods (from oak and walnut to hinoki and ebony), seven metals, glossy lacquer or paint, in a long list of colors or one you mix yourself. Visitors see it too, on your shelf, your share page and the shelf picture.

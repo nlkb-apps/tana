@@ -4,7 +4,7 @@ slug: finding-your-way
 section: Getting started
 order: 1.3
 status: ready
-updated: 2026-10-07
+updated: 2026-10-12
 ---
 
 # Finding your way around
@@ -13,11 +13,11 @@ On a phone, you will see the search, collection, wants, community, and account i
 
 - Search brings you to the search function to let you find what is across the Tana database.
 - Collection displays your own collection of games you can log and grow on Tana.
-- Wants is a growing list you can manage of the games and copies of games you’re looking for. Tap want next to a game and it will show up here.
+- Wants & lists (Wants on a phone) holds your wantlist, the games you're looking for, and nine boxes you can fill with any games for any reason. Tap Want it on a game and it shows up on the wantlist; tap Add to a box to put it in a box.
 - Community tab brings you to all the features to interact with others including leaderboards and matching wants.
 - Account is where you can manage your bio, display name, dark/light setting, etc.
 
-When you're signed in, the home page opens with your own shelf: the boxes you added most recently, how many copies you have, and four shortcuts (scan a barcode, tick off a platform, import a list, and your wantlist). If your shelf is still empty, you'll see every console instead, so you can pick one and start ticking.
+When you're signed in, the home page opens with your own shelf: the boxes you added most recently, how many copies you have, and four shortcuts (scan a barcode, tick off a platform, import a list, and your wants and lists). If your shelf is still empty, you'll see every console instead, so you can pick one and start ticking.
 
 Below that is the search box, and then Browse by platform, a row of spines for every platform on Tana with the number of games on each. Tap one to see its whole library.
 

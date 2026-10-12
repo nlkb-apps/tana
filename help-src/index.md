@@ -35,10 +35,11 @@ Welcome to the Tana help pages. Whether you're setting up your first shelf or tr
 - [3.7 Value](3-7-value.md)
 - [3.8 Smaller shelves](3-8-smaller-shelves.md)
 
-## 4. Wants
+## 4. Wants and lists
 
 - [4.1 Your wantlist](4-1-wantlist.md)
 - [4.2 Wants matches](4-2-wants-matches.md)
+- [4.3 Boxes](4-3-boxes.md)
 
 ## 5. Photos
 

@@ -14,6 +14,7 @@ updated: 2026-10-12
 - Edition: a specific product within a release (standard, reprint, limited, cover variant, etc.). This is what you add to your collection.
 - Copy: one physical copy you own of an edition
 - Main shelf: everything in your collection
+- Box: one of nine numbered lists of any games from the catalogue, owned or not, under Wants & lists
 - Smaller shelf: one of up to five shelves of games you pick from your collection, with its own name, order and style
 - Serial / product code: the code on the spine, disc or cartridge, i.e. SLPS-00700
 - JAN: the Japanese barcode number on the box
