@@ -20,10 +20,10 @@ When a release has no art of its own yet, Tana may show the box from another reg
 ## Where it comes from
 
 - Box art scans collected by libretro-thumbnails, and covers from GameTDB for PS3, Switch, Wii, GameCube, Wii U, DS and 3DS, matched to Tana's releases by product code first, then by English or Japanese title
-- The cover image from the game's English Wikipedia article, for newer games that have no scan yet
+- The cover image from the game's English Wikipedia article, for newer games that have no scan yet. Tana finds the article by the English title, or through the Japanese Wikipedia article when the game is known by its Japanese name
 - Members' photos: an approved photo of the front of a copy becomes the box art for that release, unless the release already has art from its own region
 
-Tana checks for new art every night, and the list of scans is refreshed every week.
+When the same game is filed more than once, for example once per platform, its entries share their art. Tana checks for new art every night, and the lists of scans are refreshed every week.
 
 ## When there's no box art yet
 
