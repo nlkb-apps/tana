@@ -64,5 +64,57 @@ for r,pf in REPO2PF.items():
     k=sorted(ser.get((pf,stem),()))
     if k: withk+=1
     cands.setdefault(pf,[]).append([stem]+k); n+=1
-json.dump({'repos':{v:k for k,v in REPO2PF.items()},'cands':cands},open(B+'/out/cands.json','w'),ensure_ascii=False,separators=(',',':'))
+# ---------- GameTDB (the database behind the Wii/DS USB loaders): PS3, Switch, Wii, GameCube, Wii U, DS, 3DS ----------
+# Game lists come from gametdb.com/<db>.txt ("ID = Title"); every cover URL is checked with a HEAD request before it is listed.
+import urllib.request, unicodedata
+UA = {'User-Agent': 'TanaCovers/1.0 (+https://tana.gamingjapanese.com)'}
+def get(url, tries=3):
+  for k in range(tries):
+    try: return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60).read().decode('utf-8', 'replace')
+    except Exception as e: err = e
+  print('skip', url, err); return ''
+def head(url):
+  try:
+    with urllib.request.urlopen(urllib.request.Request(url, headers=UA, method='HEAD'), timeout=30) as r: return r.status == 200
+  except Exception: return False
+def tdb(db, lang):
+  out = {}
+  for line in get(f'https://www.gametdb.com/{db}.txt?LANG={lang}').splitlines():
+    if ' = ' not in line or line.startswith('TITLES'): continue
+    i, t = line.split(' = ', 1); out[i.strip()] = t.strip()
+  return out
+LETTER = {'E': ['NA'], 'J': ['JP'], 'K': ['KR'], 'W': ['AS'], 'A': ['NA', 'EU', 'JP']}
+FOLDERS = {'NA': ['US'], 'JP': ['JA'], 'KR': ['KO'], 'AS': ['ZH', 'EN'], 'EU': ['EN', 'FR', 'DE', 'ES', 'IT', 'NL', 'AU']}
+def letter_regs(c): return LETTER.get(c, ['EU'])
+PS3P = {'BLUS': 'NA', 'BCUS': 'NA', 'BLES': 'EU', 'BCES': 'EU', 'BLJM': 'JP', 'BLJS': 'JP', 'BCJS': 'JP', 'BCJM': 'JP', 'BLJB': 'JP', 'BCJB': 'JP', 'BLAS': 'AS', 'BCAS': 'AS', 'BLKS': 'KR', 'BCKS': 'KR'}
+DBS = [  # db, art dir, extension, how to read the region, Tana platform for an id
+  ('ps3tdb', 'ps3', 'jpg', lambda i: [PS3P[i[:4]]] if i[:4] in PS3P else [], lambda i: 'ps3'),
+  ('wiitdb', 'wii', 'png', lambda i: letter_regs(i[3]) if len(i) == 6 else [], lambda i: 'gc' if i[0] in 'GD' else 'wii'),
+  ('wiiutdb', 'wiiu', 'jpg', lambda i: letter_regs(i[3]) if len(i) == 6 else [], lambda i: 'wiiu'),
+  ('dstdb', 'ds', 'jpg', lambda i: letter_regs(i[3]) if len(i) == 4 else [], lambda i: 'nds'),
+  ('3dstdb', '3ds', 'jpg', lambda i: letter_regs(i[3]) if len(i) == 4 else [], lambda i: 'n3ds'),
+  ('switchtdb', 'switch', 'jpg', lambda i: ['NA', 'JP', 'EU'], lambda i: 'switch'),
+]
+gt = {}; checks = []
+for db, art, ext, regs_of, pf_of in DBS:
+  en, ja = tdb(db, 'EN'), tdb(db, 'JA')
+  print(db, len(en), 'titles')
+  for i, t in en.items():
+    if not re.fullmatch(r'[A-Z0-9]{4,10}', i): continue
+    for reg in regs_of(i):
+      checks.append((db, art, ext, i, reg, t, ja.get(i, ''), pf_of(i)))
+def probe(c):
+  db, art, ext, i, reg, t, tj, pf = c
+  for f in FOLDERS[reg]:
+    if head(f'https://art.gametdb.com/{art}/cover/{f}/{i}.{ext}'): return (c, f)
+  return None
+with ThreadPoolExecutor(24) as ex: found = [x for x in ex.map(probe, checks) if x]
+for (db, art, ext, i, reg, t, tj, pf), f in found:
+  keys = {'S:' + i}
+  if pf in ('wii', 'gc', 'wiiu'): keys.add('G:' + i[:4])
+  if pf in ('nds', 'n3ds'): keys.add('G:' + i)
+  if pf == 'switch': keys.add('G:' + i[:5])
+  gt.setdefault(pf, []).append([f'{art}/cover/{f}/{i}.{ext}', t, tj, reg] + sorted(keys))
+print('gametdb', len(checks), 'checked,', len(found), 'covers')
+json.dump({'repos':{v:k for k,v in REPO2PF.items()},'cands':cands,'gametdb':gt},open(B+'/out/cands.json','w'),ensure_ascii=False,separators=(',',':'))
 print(n,'thumbs',withk,'with serial keys',os.path.getsize(B+'/out/cands.json')//1024,'KB')
