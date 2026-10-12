@@ -15,11 +15,11 @@ Most games on Tana show their box art: on the game page, next to each release, i
 
 Every box carries a small patch in the corner: JP, NA, EU and so on. The patch is always the region of the release you're looking at, not the region printed on the art.
 
-When a release has no art of its own yet, Tana may show the box from another region of the same game on the same platform, so you still recognise it. A Japanese release showing the North American box still says JP. Hover over the box to see which release the art comes from.
+When a release has no art of its own yet, Tana may show the box from another region of the same game on the same platform, or from the same game on another platform released around the same time, so you still recognise it. A Japanese release showing the North American box still says JP. Hover over the box to see which release the art comes from.
 
 ## Where it comes from
 
-- Box art scans collected by libretro-thumbnails, matched to Tana's releases by product code first and by title second
+- Box art scans collected by libretro-thumbnails, and covers from GameTDB for PS3, Switch, Wii, GameCube, Wii U, DS and 3DS, matched to Tana's releases by product code first, then by English or Japanese title
 - The cover image from the game's English Wikipedia article, for newer games that have no scan yet
 - Members' photos: an approved photo of the front of a copy becomes the box art for that release, unless the release already has art from its own region
 

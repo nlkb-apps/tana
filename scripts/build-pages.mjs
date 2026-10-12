@@ -536,6 +536,7 @@ function coverUrl(cov, w = 320, fmt = 'webp') {
   let origin;
   if (cov.s === 'libretro') { const i = cov.p.indexOf('/'); origin = `https://raw.githubusercontent.com/libretro-thumbnails/${cov.p.slice(0, i)}/master/Named_Boxarts/${encodeURIComponent(cov.p.slice(i + 1))}.png`; }
   else if (cov.s === 'member') origin = SUPA_PUBLIC + cov.p;
+  else if (cov.s === 'gametdb') origin = `https://art.gametdb.com/${cov.p}`;
   else origin = cov.p;
   return `https://wsrv.nl/?url=${encodeURIComponent(origin)}&w=${w}&output=${fmt}&q=82&we`;
 }
