@@ -109,26 +109,19 @@ for db, art, ext, regs_of, pf_of in DBS:
     if not re.fullmatch(r'[A-Z0-9]{4,10}', i): continue
     for reg in regs_of(i):
       checks.append((db, art, ext, i, reg, t, ja.get(i, ''), pf_of(i)))
-# the games most likely to be on Tana first: retail PS3, then Switch, Wii, DS, 3DS, Wii U; eShop/WiiWare-style ids last
-order = {'ps3tdb': 0, 'switchtdb': 1, 'wiitdb': 2, 'dstdb': 3, '3dstdb': 4, 'wiiutdb': 5}
-checks.sort(key=lambda c: (order[c[0]], {'NA': 0, 'JP': 1, 'EU': 2}.get(c[4], 3)))
-done = [0]
-def probe(c):
-  db, art, ext, i, reg, t, tj, pf = c
-  done[0] += 1
-  if done[0] % 5000 == 0: print(done[0], 'checked', int(time.time() - T0), 's', flush=True)
-  for f in FOLDERS[reg]:
-    ok = head(f'https://art.gametdb.com/{art}/cover/{f}/{i}.{ext}')
-    if ok is None: return None
-    if ok: return (c, f)
-  return None
-with ThreadPoolExecutor(64) as ex: found = [x for x in ex.map(probe, checks) if x]
+# GameTDB's art server is slow to answer bulk checks, so covers are listed unchecked in each region's main folder;
+# the database checks only the ones it matches to a release (covers_verify) and drops any that don't load.
+MAIN = {'NA': 'US', 'JP': 'JA', 'EU': 'EN', 'KR': 'KO', 'AS': 'ZH'}
+found = [(c, MAIN[c[4]]) for c in checks if c[4] in MAIN]
+stats = {}
+for c, f in found: stats[c[0]] = stats.get(c[0], 0) + 1
+print('gametdb listed', stats, flush=True)
 for (db, art, ext, i, reg, t, tj, pf), f in found:
   keys = {'S:' + i}
   if pf in ('wii', 'gc', 'wiiu'): keys.add('G:' + i[:4])
   if pf in ('nds', 'n3ds'): keys.add('G:' + i)
   if pf == 'switch': keys.add('G:' + i[:5])
   gt.setdefault(pf, []).append([f'{art}/cover/{f}/{i}.{ext}', t, tj, reg] + sorted(keys))
-print('gametdb', len(checks), 'checked,', len(found), 'covers')
-json.dump({'repos':{v:k for k,v in REPO2PF.items()},'cands':cands,'gametdb':gt},open(B+'/out/cands.json','w'),ensure_ascii=False,separators=(',',':'))
+print('gametdb', len(found), 'covers listed')
+json.dump({'repos':{v:k for k,v in REPO2PF.items()},'cands':cands,'gametdb':gt,'stats':{'gametdb':stats}},open(B+'/out/cands.json','w'),ensure_ascii=False,separators=(',',':'))
 print(n,'thumbs',withk,'with serial keys',os.path.getsize(B+'/out/cands.json')//1024,'KB')
