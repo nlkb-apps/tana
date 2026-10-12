@@ -4,10 +4,14 @@ slug: whats-new
 section: Appendices
 order: B
 status: ready
-updated: 2026-10-11
+updated: 2026-10-12
 ---
 
 # What's new
+
+## 2026-10-12: The Discord server is open
+
+When you join the Tana Discord, it now asks what you collect and which platforms you want to hear about, then shows you the channels for them. You can change your picks any time in Channels & Roles. The invite link is now discord.gg/MXWmYAhxUs and doesn't expire; the old link stops working at the end of October.
 
 ## 2026-10-11: Arrange your shelf
 
@@ -37,7 +41,7 @@ These help pages are now live at tana.gamingjapanese.com/help/, with a link at t
 
 ## 2026-09-28: Discord server and subreddit
 
-Tana now has a Discord server (discord.gg/RfwNdPS8G) and a subreddit, r/tanashelf. You'll find links on the Community page and at the bottom of every page.
+Tana now has a Discord server (discord.gg/MXWmYAhxUs) and a subreddit, r/tanashelf. You'll find links on the Community page and at the bottom of every page.
 
 ## 2026-09-27: Cover variants and edition notes
 

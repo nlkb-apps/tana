@@ -138,7 +138,7 @@ ${body}
 </main>
 <footer class="foot">
   <p>Tana catalogues physical game releases by region and edition, kept by collectors. Catalogue data is available under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, built on Wikipedia, Wikidata, Redump and MAME among other sources.</p>
-  <p>© NLKB Consulting Co., Ltd. · <a href="${SITE}/#/privacy">Privacy</a> · <a href="https://discord.gg/RfwNdPS8G" rel="noopener">Discord</a> · <a href="https://www.reddit.com/r/tanashelf/" rel="noopener">r/tanashelf</a></p>
+  <p>© NLKB Consulting Co., Ltd. · <a href="${SITE}/#/privacy">Privacy</a> · <a href="https://discord.gg/MXWmYAhxUs" rel="noopener">Discord</a> · <a href="https://www.reddit.com/r/tanashelf/" rel="noopener">r/tanashelf</a></p>
 </footer>
 </body>
 </html>
@@ -526,7 +526,7 @@ function parseHelp(text) {
   if (m) for (const line of m[1].split('\n')) { const i = line.indexOf(':'); if (i > 0) meta[line.slice(0, i).trim()] = line.slice(i + 1).trim(); }
   return { meta, body: m ? m[2] : text };
 }
-const COMMUNITY = [['discord.gg/RfwNdPS8G', 'https://discord.gg/RfwNdPS8G'], ['r/tanashelf', 'https://www.reddit.com/r/tanashelf/']];
+const COMMUNITY = [['discord.gg/MXWmYAhxUs', 'https://discord.gg/MXWmYAhxUs'], ['r/tanashelf', 'https://www.reddit.com/r/tanashelf/']];
 function inline(t, linkFor) {
   let h = esc(t);
   h = h.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label, href) => `<a href="${esc(linkFor(href))}">${label}</a>`);

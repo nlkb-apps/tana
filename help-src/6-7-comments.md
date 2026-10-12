@@ -13,4 +13,4 @@ Every game page has a Discussion section at the bottom where you can leave a com
 
 Comments count toward your contribution orb, one per game, as long as they're more than a few words.
 
-For longer conversations, come say hi on our Discord (discord.gg/RfwNdPS8G) or on r/tanashelf.
+For longer conversations, come say hi on our Discord (discord.gg/MXWmYAhxUs) or on r/tanashelf.

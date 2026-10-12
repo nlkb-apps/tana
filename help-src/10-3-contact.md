@@ -9,6 +9,6 @@ updated: 2026-09-29
 
 # Contact and feedback
 
-The best way to reach us is on our Discord (discord.gg/RfwNdPS8G), in #tana-feedback for ideas and bug reports, or on r/tanashelf.
+The best way to reach us is on our Discord (discord.gg/MXWmYAhxUs), in #tana-feedback for ideas and bug reports, or on r/tanashelf.
 
 Screenshots help a lot when something isn't working.
