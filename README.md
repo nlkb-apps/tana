@@ -1,0 +1,1 @@
+Cover matching data for Tana (not part of the site). cands.json lists libretro-thumbnails box art names per Tana platform, with serial keys from libretro-database DATs. Loaded into the database by public.covers_load().
