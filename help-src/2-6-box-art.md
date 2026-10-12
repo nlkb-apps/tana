@@ -4,12 +4,12 @@ slug: box-art
 section: Finding games
 order: 2.6
 status: ready
-updated: 2026-10-12
+updated: 2026-10-13
 ---
 
 # Box art
 
-Most games on Tana show their box art: on the game page, next to each release, in search results and in My 9. More than three quarters of all releases have it, and almost every Famicom, Super Famicom, Mega Drive, PC Engine, Game Boy, N64, PlayStation, Saturn, Dreamcast, DS and Wii release.
+Most games on Tana show their box art: on the game page, next to each release, in search results and in My 9. More than four in five releases have it, and almost every Famicom, Super Famicom, Mega Drive, PC Engine, Game Boy, N64, PlayStation, Saturn, Dreamcast, DS and Wii release.
 
 ## The region patch
 

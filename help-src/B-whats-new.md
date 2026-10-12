@@ -4,10 +4,16 @@ slug: whats-new
 section: Appendices
 order: B
 status: ready
-updated: 2026-10-12
+updated: 2026-10-13
 ---
 
 # What's new
+
+## 2026-10-13: Box art for PS3, Switch and newer consoles
+
+Box art now covers far more of the catalogue. PS3 and Switch games get their real boxes for each region, matched by product code where Tana has one, and PS4, PS5, Xbox 360 and Xbox One games mostly have art too. Games filed under a capitalised or catalogue-style title ("Elder Scrolls V, The - Skyrim"), special editions and games known by their Japanese name now find their art, and when the same game is filed once per platform, the entries share it. Nintendo Switch 2 Editions use the Switch box until they have their own.
+
+In My 9, each version of a game now shows its box when you pick the one you played.
 
 ## 2026-10-12: Box art
 
