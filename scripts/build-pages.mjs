@@ -698,7 +698,7 @@ async function buildMy9(platforms) {
 // ---------- Today's Box (/box/): the share link, with today's opening mosaic as its preview picture ----------
 function boxLanding(t) {
   const title = t ? `今日の一箱 No. ${t.no} · Today's Box | Tana` : `今日の一箱 · Today's Box | Tana`;
-  const desc = `Guess today's game from its box, revealed one 8-bit mosaic at a time. Then pick which box is Japan's. One box a day for everyone, free.`;
+  const desc = `Guess today's game from its box, revealed one 8-bit mosaic at a time. One box a day for everyone, free.`;
   return layout({ title, desc, canonical: `${SITE}/box/`, ogImage: `${SITE}/box/card.png`, noindex: false,
     body: `<script>location.replace('/#/box' + location.search);</script>
 <section class="profile"><p class="crumb">A daily game on Tana</p><h1><span lang="ja">今日の一箱</span> Today's Box</h1>
@@ -751,7 +751,7 @@ ${art}
 <text x="640" y="232" font-family="Shippori Mincho B1" font-weight="700" font-size="72" fill="#1D1B17">今日の一箱</text>
 <text x="640" y="300" font-family="Libre Caslon Text" font-weight="700" font-size="34" fill="#1D1B17">What game is this box?</text>
 <text x="640" y="350" font-family="Inter" font-size="23" fill="#5D5A52">Six tries. Each miss sharpens the box.</text>
-<text x="640" y="384" font-family="Inter" font-size="23" fill="#5D5A52">Then: which box is Japan's?</text>
+<text x="640" y="384" font-family="Inter" font-size="23" fill="#5D5A52">A new box every day at midnight in Japan.</text>
 ${t && t.pn ? `<rect x="640" y="418" width="${18 + t.pn.length * 11.5}" height="38" rx="4" fill="#F7F6F2" stroke="#1D1B17" stroke-width="1.5"/><rect x="654" y="432" width="10" height="10" rx="2" fill="${esc(t.color || '#5E6675')}"/><text x="672" y="443" font-family="Inter" font-weight="600" font-size="17" fill="#1D1B17">${esc(t.pn)}</text>` : ''}
 <rect x="640" y="548" width="7" height="26" rx="1" fill="#B4452A"/><rect x="650" y="542" width="7" height="32" rx="1" fill="#2C4A7E"/><rect x="660" y="552" width="7" height="22" rx="1" fill="#2E6A4E"/>
 <text x="678" y="572" font-family="Libre Caslon Text" font-weight="700" font-size="26" fill="#1D1B17">Tana</text>

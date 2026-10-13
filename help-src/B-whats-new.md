@@ -11,9 +11,9 @@ updated: 2026-10-13
 
 ## 2026-10-13: Today's Box · 今日の一箱
 
-A new daily game. Every day at midnight Japan time, one box opens for everyone as an 8-bit mosaic. Guess the game in six tries, and each miss sharpens the box and adds a clue. Then the bonus round: the same game's Japanese and Western boxes, pixelated. Which is Japan's?
+A new daily game. Every day at midnight Japan time, one box opens for everyone as an 8-bit mosaic. Guess the game in six tries, and each miss sharpens the box and adds a clue.
 
-Every day you play earns a stamp on the month's stamp card. Stamp a whole month and its brass plate goes under your shelf. Share your result without spoiling the answer, and see how the people you follow did. No account needed to play: tana.gamingjapanese.com/box/. See Today's Box for how it works.
+Every day you finish earns a stamp on the month's stamp card. Stamp a whole month and its brass plate goes under your shelf. Share your result without spoiling the answer, and see how the people you follow did. No account needed to play: tana.gamingjapanese.com/box/. See Today's Box for how it works.
 
 ## 2026-10-13: Box art for PS3, Switch and newer consoles
 
