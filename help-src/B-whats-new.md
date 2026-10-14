@@ -9,6 +9,10 @@ updated: 2026-10-14
 
 # What's new
 
+## 2026-10-14: Asking about the weekly letter
+
+Members who haven't said yes or no to the weekly letter now see one short question at the top of the page. Answer it once and it's gone; **Later** hides it until your next visit. See [The weekly letter](6-13-weekly-letter.md).
+
 ## 2026-10-14: A proper writing box for the weekly letter
 
 The letter desk now has a writing box that works like a word processor: headings, fonts, sizes, colours and highlights, lists, links and dividers. Pictures go in with a button, a paste or a drag, and click one to resize it. The box button puts a game's cover in the letter, linked to its page, and a saved signature goes in with one press. Members get the letter as written, in any mail app. See [The weekly letter](6-13-weekly-letter.md).

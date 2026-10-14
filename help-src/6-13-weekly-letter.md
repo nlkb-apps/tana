@@ -18,7 +18,7 @@ Under the letter there are two short lists made from Tana itself:
 
 ## Getting it, or not
 
-Nobody gets the letter unless they say yes. You can say yes when you sign up, from the card that appears on your collection page, or in Account under The weekly letter. Every letter has an unsubscribe link that works in one click, and you can switch it off in Account any time.
+Nobody gets the letter unless they say yes. You can say yes when you sign up, from the card on your collection page, from the one-line question at the top of the page (it stays until you answer, and **Later** hides it until your next visit), or in Account under The weekly letter. Every letter has an unsubscribe link that works in one click, and you can switch it off in Account any time.
 
 Replies go to Nico. The letter is sent through Resend, an email delivery service; see [Privacy and your data](9-3-privacy-and-data.md).
 
