@@ -4,10 +4,16 @@ slug: whats-new
 section: Appendices
 order: B
 status: ready
-updated: 2026-10-14
+updated: 2026-10-15
 ---
 
 # What's new
+
+## 2026-10-15: Faster search, and Today's Box understands English titles
+
+Search across Tana is much faster: a search that took a second or two now comes back almost at once.
+
+In Today's Box, the guess list now finds games by their Western name as well as the Japanese and romanised titles, shows each game once with all its platforms, and counts any platform's copy as the right game. Typing numbers for Roman numerals works, and small typos still find the game. See [Today's Box](6-8-todays-box.md).
 
 ## 2026-10-14: Asking about the weekly letter
 
