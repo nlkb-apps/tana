@@ -41,3 +41,4 @@ updated: 2026-10-14
 - Shelf twin: a member whose shelf shares many exact copies with yours
 - Lone keeper: the only member on Tana with a particular edition
 - Circle: a group of members collecting one set of games together
+- The weekly letter: a short email from Nico, for members who ask for it, with a few lines from your own shelf

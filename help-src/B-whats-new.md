@@ -9,6 +9,16 @@ updated: 2026-10-14
 
 # What's new
 
+## 2026-10-14: A welcome for new members, the weekly letter, and imports from PriceCharting and CLZ
+
+New members now land on Welcome the first time they sign in. It shows the quickest ways to get games onto the shelf, and until there's at least one game, a thin bar at the top of each page leads back to it. If the confirmation email doesn't arrive, the sign-up page can send it again. See [Creating an account](1-2-create-account.md).
+
+The **weekly letter** is a short email from Nico, only for members who ask for it, with a few lines from your own shelf underneath. Say yes or no in Account. See [The weekly letter](6-13-weekly-letter.md).
+
+The importer now reads collection exports from **PriceCharting** and **CLZ Games**, including platform names like "JP Sega Saturn" and "PAL Super Nintendo". See [Importing a collection](3-4-importing.md).
+
+The Community tab opens on an overview, with Today's Box and Box Battle first. Box Battle also has its own link, tana.gamingjapanese.com/battle/, which shows today's two boxes when you share it.
+
 ## 2026-10-14: The Wanted board, Box Battle, Shelf twins and Circles
 
 Four new things under Community.

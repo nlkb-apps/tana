@@ -14,7 +14,7 @@ On a phone, you will see the search, collection, wants, community, and account i
 - Search brings you to the search function to let you find what is across the Tana database.
 - Collection displays your own collection of games you can log and grow on Tana.
 - Wants & lists (Wants on a phone) holds your wantlist, the games you're looking for, and nine boxes you can fill with any games for any reason. Tap Want it on a game and it shows up on the wantlist; tap Add to a box to put it in a box.
-- Community tab brings you to everything you do with other collectors: the leaderboard, the Wanted board, Box Battle, Today's Box, Circles, Shelf twins, the people you follow and wants matches.
+- Community tab opens an overview with today's two daily games, Today's Box and Box Battle, then the Wanted board and Circles. The leaderboard, Shelf twins, the people you follow and wants matches are under More.
 - Account is where you can manage your bio, display name, dark/light setting, etc.
 
 When you're signed in, the home page opens with your own shelf: the boxes you added most recently, how many copies you have, and four shortcuts (scan a barcode, tick off a platform, import a list, and your wants and lists). If your shelf is still empty, you'll see every console instead, so you can pick one and start ticking.

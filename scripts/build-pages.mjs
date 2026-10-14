@@ -137,6 +137,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 <main class="page">
 ${body}
 </main>
+<script src="${SITE}/t.js" defer></script>
 <footer class="foot">
   <p>Tana catalogues physical game releases by region and edition, kept by collectors. Catalogue data is available under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, built on Wikipedia, Wikidata, Redump and MAME among other sources.</p>
   <p>© NLKB Consulting Co., Ltd. · <a href="${SITE}/#/privacy">Privacy</a> · <a href="https://discord.gg/MXWmYAhxUs" rel="noopener">Discord</a> · <a href="https://www.reddit.com/r/tanashelf/" rel="noopener">r/tanashelf</a></p>
@@ -353,6 +354,9 @@ async function main() {
   await buildProfiles();
   await buildMy9(platforms);
   await buildBox();
+  try { await buildBattle(); } catch (e) { console.warn('Box Battle page skipped:', e.message); }
+  // The visit counter static pages load: one call to track(), no cookies (see the app's privacy page)
+  if (SUPABASE_URL && ANON) await writeIfChanged(join(OUT, 't.js'), `(function(){try{var q=new URLSearchParams(location.search);fetch(${JSON.stringify(SUPABASE_URL + '/rest/v1/rpc/track')},{method:'POST',keepalive:true,headers:{apikey:${JSON.stringify(ANON)},'Content-Type':'application/json'},body:JSON.stringify({p_path:location.pathname,p_ref:document.referrer||null,p_src:q.get('src')||q.get('utm_source'),p_kind:'page'})}).catch(function(){})}catch(e){}})();\n`);
 
   console.log(`${works.size} games, ${platformsRaw.length} platforms, ${written} game pages changed, ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 }
@@ -636,7 +640,7 @@ function my9Page(g) {
   const list = (g.cells || []).filter(Boolean);
   return layout({ title: `${g.name}: ${en} | My 9 on Tana`, desc: `${list.map(c => c.t).join(', ')}. ${ja}.`, canonical: url, noindex: true,
     ogImage: `${SITE}/my9/${encodeURIComponent(g.username)}/${g.slot}/grid.png`,
-    body: `<script>location.replace(${JSON.stringify(app)});</script>
+    body: `${goApp(app)}
 <section class="profile"><p class="crumb">My 9</p><h1>${esc(g.name)}: ${esc(en)}</h1>
 <ol>${list.map(c => `<li>${esc(c.t)}${c.ja && c.ja !== c.t ? ` <span lang="ja">${esc(c.ja)}</span>` : ''}${c.note ? `: ${esc(c.note)}` : ''}</li>`).join('')}</ol>
 <p class="actions"><a class="btn primary" href="${esc(app)}">Open it on Tana</a> <a class="btn" href="${SITE}/#/my9">Make your own</a></p></section>` });
@@ -644,7 +648,7 @@ function my9Page(g) {
 function my9Landing() {
   return layout({ title: 'My 9: the nine games that made you | Tana', desc: 'The nine games that made you, on one shelf. Pick the exact version you played, when it got you and why, and get a picture ready to post. Free, no account needed.',
     canonical: `${SITE}/my9/`, ogImage: `${SITE}/my9/card.png`,
-    body: `<script>location.replace('/#/my9' + location.search);</script>
+    body: `${goApp('/#/my9')}
 <section class="profile"><p class="crumb">New on Tana</p><h1>My 9</h1>
 <p class="lede">The nine games that made you, on one shelf. Pick the exact version you played, when it got you and why, and get a picture ready to post. Free, no account needed.</p>
 <p class="actions"><a class="btn primary" href="${SITE}/#/my9">Make your My 9</a> <a class="btn" href="${SITE}/#/my9/census">See the census</a></p></section>` });
@@ -695,12 +699,14 @@ async function buildMy9(platforms) {
   console.log(`${grids.length} public My 9 grids, ${pages} pages changed`);
 }
 
+// Pages that only hand over to the app pass the referring site along (?r=), so the app's visit count knows where people came from
+const goApp = hash => `<script>(function(){var s=location.search,r=document.referrer;if(r&&r.indexOf(location.host)<0)s+=(s?'&':'?')+'r='+encodeURIComponent(r);location.replace(${JSON.stringify(hash)}+s)})()</script>`;
 // ---------- Today's Box (/box/): the share link, with today's opening mosaic as its preview picture ----------
 function boxLanding(t) {
   const title = t ? `Today's Box #${t.no}: what game is this box? | Tana` : `Today's Box: what game is this box? | Tana`;
   const desc = `Guess today's game from its box, revealed one 8-bit mosaic at a time. One box a day for everyone, free.`;
   return layout({ title, desc, canonical: `${SITE}/box/`, ogImage: `${SITE}/box/card.png`, noindex: false,
-    body: `<script>location.replace('/#/box' + location.search);</script>
+    body: `${goApp('/#/box')}
 <section class="profile"><p class="crumb">A daily game on Tana</p><h1>Today's Box</h1>
 <p class="lede">${esc(desc)}</p>
 <p class="actions"><a class="btn primary" href="${SITE}/#/box">Play today's box</a></p></section>` });
@@ -783,6 +789,97 @@ async function buildBox() {
   } catch { Resvg = null; }
   if (Resvg) await writeBinIfChanged(join(OUT, 'box', 'card.png'), new Resvg(boxCardSvg(t, img), { fitTo: { mode: 'width', value: 1200 }, font: { fontFiles, loadSystemFonts: false, defaultFontFamily: 'Inter' } }).render().asPng());
   console.log(`Today's Box page${t ? ` (No. ${t.no})` : ''}${img ? ' with its mosaic' : ''}`);
+}
+
+// ---------- Box Battle (/battle/): the share link, with today's two boxes as its preview picture,
+// and /battle/week.png: the last seven results in one picture, for posting each week ----------
+function battleLanding(t) {
+  const name = t && t.work ? (t.work.title_west || t.work.title_en) : '';
+  const title = t ? `Box Battle #${t.no}: ${name}, Japan's box or the West's? | Tana` : `Box Battle: Japan's box or the West's? | Tana`;
+  const desc = `One game a day, two boxes: the Japanese one and the Western one. Pick the better box, then see how everyone voted. Free, no account needed.`;
+  return layout({ title, desc, canonical: `${SITE}/battle/`, ogImage: `${SITE}/battle/card.png`,
+    body: `${goApp('/#/battle')}
+<section class="profile"><p class="crumb">A daily vote on Tana</p><h1>Box Battle</h1>
+<p class="lede">${esc(desc)}</p>
+<p class="actions"><a class="btn primary" href="${SITE}/#/battle">Vote in today's battle</a></p></section>` });
+}
+function boxImg(d, x, y, mw, mh) {   // a box picture fitted into a space, standing on its bottom edge, with a soft shadow
+  if (!d) return `<rect x="${x + mw * .15}" y="${y + mh * .1}" width="${mw * .7}" height="${mh * .9}" fill="#5D5A52"/>`;
+  const r = d.w / d.h; let h = mh, w = h * r; if (w > mw) { w = mw; h = w / r; }
+  const bx = x + (mw - w) / 2, by = y + mh - h;
+  return `<rect x="${(bx + 6).toFixed(1)}" y="${(by + 10).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="#000" fill-opacity=".35"/><image href="${d.href}" x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" preserveAspectRatio="none"/>`;
+}
+const regPatch = (reg, x, y, s = 1) => { const c = reg === 'JP' ? '#B4452A' : reg === 'EU' ? '#2E6A4E' : '#2C4A7E';
+  return `<rect x="${x}" y="${y}" width="${46 * s}" height="${28 * s}" rx="2" fill="#F4EFE4" stroke="${c}" stroke-width="${2.5 * s}"/><text x="${x + 23 * s}" y="${y + 20 * s}" text-anchor="middle" font-family="Inter" font-weight="600" font-size="${17 * s}" fill="${c}">${esc(reg)}</text>`; };
+function battleCardSvg(t, a, b) {
+  const W = 1200, H = 630, name = t && t.work ? (t.work.title_west || t.work.title_en) : 'Box Battle';
+  const lines = wrapWords(name, 18, 2);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+<rect width="${W}" height="${H}" fill="#ECEBE6"/>
+<rect x="560" y="50" width="590" height="530" rx="10" fill="#1D1B17"/>
+${boxImg(a, 590, 90, 245, 420)}${boxImg(b, 875, 90, 245, 420)}
+${t ? regPatch(t.jp.reg, 600, 520) + regPatch(t.w.reg, 1064, 520) : ''}
+<text x="855" y="544" text-anchor="middle" font-family="Inter" font-weight="600" font-size="20" fill="#C9A13B">VS</text>
+<text x="60" y="110" font-family="Inter" font-weight="600" font-size="18" letter-spacing="3" fill="#6B675E">BOX BATTLE${t ? ` · #${t.no}` : ''}</text>
+${lines.map((l, k) => `<text x="60" y="${185 + k * 64}" font-family="Libre Caslon Text" font-weight="700" font-size="58" fill="#1D1B17">${esc(l)}</text>`).join('')}
+<text x="60" y="${185 + lines.length * 64 + 20}" font-family="Libre Caslon Text" font-weight="700" font-size="32" fill="#1D1B17">Japan's box or the West's?</text>
+<text x="60" y="${185 + lines.length * 64 + 66}" font-family="Inter" font-size="23" fill="#5D5A52">Pick the better box, then see how</text>
+<text x="60" y="${185 + lines.length * 64 + 98}" font-family="Inter" font-size="23" fill="#5D5A52">everyone voted. A new pair every day.</text>
+<rect x="60" y="548" width="7" height="26" rx="1" fill="#B4452A"/><rect x="70" y="542" width="7" height="32" rx="1" fill="#2C4A7E"/><rect x="80" y="552" width="7" height="22" rx="1" fill="#2E6A4E"/>
+<text x="98" y="572" font-family="Libre Caslon Text" font-weight="700" font-size="26" fill="#1D1B17">Tana</text>
+<text x="520" y="572" text-anchor="end" font-family="Inter" font-size="19" fill="#6B675E">tana.gamingjapanese.com/battle</text>
+</svg>`;
+}
+function battleWeekSvg(rows) {   // rows: [{no, title, jp, w, winner, a, b, jr, wr}], oldest first
+  const W = 1200, H = 675, n = Math.max(1, rows.length), cw = (W - 120) / n;
+  const total = rows.reduce((o, r) => { if (r.winner === 'jp') o.jp++; else if (r.winner === 'w') o.w++; return o; }, { jp: 0, w: 0 });
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+<rect width="${W}" height="${H}" fill="#ECEBE6"/>
+<text x="60" y="80" font-family="Inter" font-weight="600" font-size="18" letter-spacing="3" fill="#6B675E">BOX BATTLE · THE WEEK</text>
+<text x="60" y="140" font-family="Libre Caslon Text" font-weight="700" font-size="50" fill="#1D1B17">Japan ${total.jp}, the West ${total.w}</text>
+${rows.map((r, k) => { const x = 60 + k * cw, win = r.winner, n2 = r.jp + r.w, pj = n2 ? Math.round(100 * r.jp / n2) : 0;
+  return `<g>
+  <rect x="${x + 6}" y="180" width="${cw - 12}" height="400" rx="8" fill="#F7F6F2" stroke="#D6D3CA"/>
+  ${boxImg(r.a, x + 14, 200, (cw - 36) / 2, 190)}${boxImg(r.b, x + 22 + (cw - 36) / 2, 200, (cw - 36) / 2, 190)}
+  ${win ? `<rect x="${win === 'jp' ? x + 20 + (cw - 36) / 2 : x + 12}" y="196" width="${(cw - 32) / 2 + 2}" height="206" fill="#F7F6F2" fill-opacity=".62"/><rect x="${win === 'jp' ? x + 14 : x + 22 + (cw - 36) / 2}" y="402" width="${(cw - 36) / 2}" height="6" rx="2" fill="#C9A13B"/>` : ''}
+  <text x="${x + cw / 2}" y="430" text-anchor="middle" font-family="Inter" font-weight="600" font-size="15" fill="#6B675E">#${r.no}</text>
+  ${wrapWords(r.title, 14, 2).map((l, j) => `<text x="${x + cw / 2}" y="${462 + j * 26}" text-anchor="middle" font-family="Libre Caslon Text" font-weight="700" font-size="21" fill="#1D1B17">${esc(l)}</text>`).join('')}
+  <text x="${x + cw / 2}" y="548" text-anchor="middle" font-family="Inter" font-weight="600" font-size="17" fill="${win === 'jp' ? '#B4452A' : win === 'w' ? '#2C4A7E' : '#6B675E'}">${n2 ? (win ? `${win === 'jp' ? 'Japan' : 'West'} ${win === 'jp' ? pj : 100 - pj}%` : 'Tie') : 'No votes'}</text></g>`; }).join('')}
+<rect x="60" y="618" width="7" height="26" rx="1" fill="#B4452A"/><rect x="70" y="612" width="7" height="32" rx="1" fill="#2C4A7E"/><rect x="80" y="622" width="7" height="22" rx="1" fill="#2E6A4E"/>
+<text x="98" y="642" font-family="Libre Caslon Text" font-weight="700" font-size="26" fill="#1D1B17">Tana</text>
+<text x="1140" y="642" text-anchor="end" font-family="Inter" font-size="19" fill="#6B675E">Vote every day: tana.gamingjapanese.com/battle</text>
+</svg>`;
+}
+async function buildBattle() {
+  let t = null, hall = null;
+  if (!SAMPLE) {
+    t = await rpc('battle_today', {}).catch(e => { console.warn('Box Battle skipped:', e.message); return null; });
+    hall = await rpc('battle_hall', { p_limit: 1 }).catch(() => null);
+  }
+  await mkdir(join(OUT, 'battle'), { recursive: true });
+  await writeIfChanged(join(OUT, 'battle', 'index.html'), battleLanding(t));
+  let Resvg = null, fontFiles = [];
+  try {
+    ({ Resvg } = await import('@resvg/resvg-js'));
+    const req = createRequire(import.meta.url);
+    fontFiles = ['@expo-google-fonts/libre-caslon-text/700Bold/LibreCaslonText_700Bold.ttf', '@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf',
+                 '@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf', '@expo-google-fonts/shippori-mincho-b1/700Bold/ShipporiMinchoB1_700Bold.ttf'].map(f => req.resolve(f));
+  } catch { Resvg = null; }
+  if (!Resvg) return;
+  const png = svg => new Resvg(svg, { fitTo: { mode: 'width', value: 1200 }, font: { fontFiles, loadSystemFonts: false, defaultFontFamily: 'Inter' } }).render().asPng();
+  if (t) await writeBinIfChanged(join(OUT, 'battle', 'card.png'), png(battleCardSvg(t, await coverData(t.jp), await coverData(t.w))));
+  // The week: the last seven closed battles, each with both boxes
+  const recent = ((hall && hall.recent) || []).slice(0, 7).reverse();
+  if (recent.length) {
+    const rows = [];
+    for (const r of recent) {
+      const d = await rpc('battle_today', { p_day: r.day }).catch(() => null);
+      if (!d) continue;
+      rows.push({ no: r.no, title: r.title_west || r.title_en, jp: r.jp, w: r.w, winner: r.winner, a: await coverData(d.jp), b: await coverData(d.w) });
+    }
+    if (rows.length) await writeBinIfChanged(join(OUT, 'battle', 'week.png'), png(battleWeekSvg(rows)));
+  }
+  console.log(`Box Battle page${t ? ` (#${t.no})` : ''}, ${recent.length} results in the week picture`);
 }
 
 async function writeBinIfChanged(path, buf) {
