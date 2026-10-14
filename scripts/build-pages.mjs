@@ -620,10 +620,10 @@ function my9Svg(g, invite) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
 <rect width="${W}" height="${H}" fill="#ECEBE6"/>
 ${cubbySvg(g, 50, 40, cw)}
-<text x="660" y="96" font-family="Inter" font-weight="600" font-size="18" letter-spacing="2" fill="#6B675E">MY 9 · 私を構成する9本</text>
+<text x="660" y="96" font-family="Inter" font-weight="600" font-size="18" letter-spacing="2" fill="#6B675E">MY 9</text>
 ${tl.map((l, k) => `<text x="660" y="${158 + k * 60}" font-family="${ja ? 'Shippori Mincho B1' : 'Libre Caslon Text'}" font-weight="700" font-size="50" fill="#1D1B17">${esc(l)}</text>`).join('')}
 <text x="660" y="${158 + tl.length * 60 + 4}" font-family="Inter" font-weight="400" font-size="26" fill="#5D5A52">${esc(invite ? 'Make yours on Tana. No account needed.' : clip(g.name, 30))}</text>
-<text x="660" y="540" font-family="Inter" font-weight="400" font-size="19" fill="#6B675E">#私を構成する9本 #My9Games</text>
+<text x="660" y="540" font-family="Inter" font-weight="400" font-size="19" fill="#6B675E">#My9Games #私を構成する9本</text>
 <rect x="660" y="562" width="7" height="26" rx="1" fill="#B4452A"/><rect x="670" y="556" width="7" height="32" rx="1" fill="#2C4A7E"/><rect x="680" y="566" width="7" height="22" rx="1" fill="#2E6A4E"/>
 <text x="698" y="586" font-family="Libre Caslon Text" font-weight="700" font-size="26" fill="#1D1B17">Tana</text>
 <text x="1150" y="586" text-anchor="end" font-family="Inter" font-weight="400" font-size="19" fill="#6B675E">tana.gamingjapanese.com/my9</text>
@@ -637,15 +637,15 @@ function my9Page(g) {
   return layout({ title: `${g.name}: ${en} | My 9 on Tana`, desc: `${list.map(c => c.t).join(', ')}. ${ja}.`, canonical: url, noindex: true,
     ogImage: `${SITE}/my9/${encodeURIComponent(g.username)}/${g.slot}/grid.png`,
     body: `<script>location.replace(${JSON.stringify(app)});</script>
-<section class="profile"><p class="crumb">My 9 · <span lang="ja">私を構成する9本</span></p><h1>${esc(g.name)}: ${esc(en)}</h1>
+<section class="profile"><p class="crumb">My 9</p><h1>${esc(g.name)}: ${esc(en)}</h1>
 <ol>${list.map(c => `<li>${esc(c.t)}${c.ja && c.ja !== c.t ? ` <span lang="ja">${esc(c.ja)}</span>` : ''}${c.note ? `: ${esc(c.note)}` : ''}</li>`).join('')}</ol>
 <p class="actions"><a class="btn primary" href="${esc(app)}">Open it on Tana</a> <a class="btn" href="${SITE}/#/my9">Make your own</a></p></section>` });
 }
 function my9Landing() {
-  return layout({ title: 'My 9 · 私を構成する9本 | Tana', desc: 'The nine games that made you, on one shelf. Pick the exact version you played, when it got you and why, and get a picture ready to post. Free, no account needed.',
+  return layout({ title: 'My 9: the nine games that made you | Tana', desc: 'The nine games that made you, on one shelf. Pick the exact version you played, when it got you and why, and get a picture ready to post. Free, no account needed.',
     canonical: `${SITE}/my9/`, ogImage: `${SITE}/my9/card.png`,
     body: `<script>location.replace('/#/my9' + location.search);</script>
-<section class="profile"><p class="crumb">New on Tana</p><h1>My 9 <span lang="ja">私を構成する9本</span></h1>
+<section class="profile"><p class="crumb">New on Tana</p><h1>My 9</h1>
 <p class="lede">The nine games that made you, on one shelf. Pick the exact version you played, when it got you and why, and get a picture ready to post. Free, no account needed.</p>
 <p class="actions"><a class="btn primary" href="${SITE}/#/my9">Make your My 9</a> <a class="btn" href="${SITE}/#/my9/census">See the census</a></p></section>` });
 }
@@ -697,11 +697,11 @@ async function buildMy9(platforms) {
 
 // ---------- Today's Box (/box/): the share link, with today's opening mosaic as its preview picture ----------
 function boxLanding(t) {
-  const title = t ? `今日の一箱 No. ${t.no} · Today's Box | Tana` : `今日の一箱 · Today's Box | Tana`;
+  const title = t ? `Today's Box #${t.no}: what game is this box? | Tana` : `Today's Box: what game is this box? | Tana`;
   const desc = `Guess today's game from its box, revealed one 8-bit mosaic at a time. One box a day for everyone, free.`;
   return layout({ title, desc, canonical: `${SITE}/box/`, ogImage: `${SITE}/box/card.png`, noindex: false,
     body: `<script>location.replace('/#/box' + location.search);</script>
-<section class="profile"><p class="crumb">A daily game on Tana</p><h1><span lang="ja">今日の一箱</span> Today's Box</h1>
+<section class="profile"><p class="crumb">A daily game on Tana</p><h1>Today's Box</h1>
 <p class="lede">${esc(desc)}</p>
 <p class="actions"><a class="btn primary" href="${SITE}/#/box">Play today's box</a></p></section>` });
 }
@@ -747,8 +747,8 @@ function boxCardSvg(t, img) {
 <rect x="${X - 18}" y="${Y - 18}" width="${S + 36}" height="${S + 36}" rx="4" fill="url(#fr)"/>
 <rect x="${X}" y="${Y}" width="${S}" height="${S}" fill="#2A1C12"/><rect x="${X}" y="${Y}" width="${S}" height="${S * 0.3}" fill="url(#sh)"/>
 ${art}
-<text x="640" y="150" font-family="Inter" font-weight="600" font-size="18" letter-spacing="3" fill="#6B675E">TODAY'S BOX${t ? ` · No. ${t.no}` : ''}</text>
-<text x="640" y="232" font-family="Shippori Mincho B1" font-weight="700" font-size="72" fill="#1D1B17">今日の一箱</text>
+<text x="640" y="150" font-family="Inter" font-weight="600" font-size="18" letter-spacing="3" fill="#6B675E">A DAILY GAME ON TANA${t ? ` · #${t.no}` : ''}</text>
+<text x="640" y="232" font-family="Libre Caslon Text" font-weight="700" font-size="70" fill="#1D1B17">Today's Box</text>
 <text x="640" y="300" font-family="Libre Caslon Text" font-weight="700" font-size="34" fill="#1D1B17">What game is this box?</text>
 <text x="640" y="350" font-family="Inter" font-size="23" fill="#5D5A52">Six tries. Each miss sharpens the box.</text>
 <text x="640" y="384" font-family="Inter" font-size="23" fill="#5D5A52">A new box every day at midnight in Japan.</text>

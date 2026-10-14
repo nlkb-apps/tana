@@ -4,12 +4,16 @@ slug: whats-new
 section: Appendices
 order: B
 status: ready
-updated: 2026-10-13
+updated: 2026-10-14
 ---
 
 # What's new
 
-## 2026-10-13: Today's Box · 今日の一箱
+## 2026-10-14: Menus and headings in English
+
+Every menu, heading and label in Tana is now in English first. Today's Box, My 9, the stamp cards, platform names and the share text all read in English, and where a Japanese name is worth knowing (My 9 is known in Japan as 私を構成する9本), it appears in small print underneath. Game titles still show their Japanese name for Japanese releases, as before, and the shelf mark 棚 stays in the logo.
+
+## 2026-10-13: Today's Box
 
 A new daily game. Every day at midnight Japan time, one box opens for everyone as an 8-bit mosaic. Guess the game in six tries, and each miss sharpens the box and adds a clue.
 
@@ -27,7 +31,7 @@ Games now show their real box art: on game pages, next to every release, in sear
 
 Games with no art yet show a plain label with the title. An approved photo of the front of your copy fills it in, and you can report wrong box art from the game page. See Box art for where it comes from.
 
-## 2026-10-12: My 9 · 私を構成する9本
+## 2026-10-12: My 9
 
 Make the grid of the nine games that made you, on a 3 by 3 cubby shelf. Pick the exact version you played, add your age or the year and a line about why, and put your keystone game in the middle. Each game shows its box art.
 

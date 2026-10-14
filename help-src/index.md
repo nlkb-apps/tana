@@ -41,7 +41,7 @@ Welcome to the Tana help pages. Whether you're setting up your first shelf or tr
 - [4.1 Your wantlist](4-1-wantlist.md)
 - [4.2 Wants matches](4-2-wants-matches.md)
 - [4.3 Boxes](4-3-boxes.md)
-- [4.4 My 9 · 私を構成する9本](4-4-my9.md)
+- [4.4 My 9](4-4-my9.md)
 
 ## 5. Photos
 
@@ -58,7 +58,7 @@ Welcome to the Tana help pages. Whether you're setting up your first shelf or tr
 - [6.5 The leaderboard and verified games](6-5-leaderboard.md)
 - [6.6 The contribution orb](6-6-contribution-orb.md)
 - [6.7 Comments and discussion](6-7-comments.md)
-- [6.8 Today's Box · 今日の一箱](6-8-todays-box.md)
+- [6.8 Today's Box](6-8-todays-box.md)
 
 ## 7. Improving the catalogue
 

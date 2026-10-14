@@ -1,13 +1,13 @@
 ---
-title: Today's Box · 今日の一箱
+title: Today's Box
 slug: todays-box
 section: Sharing and community
 order: 6.8
 status: ready
-updated: 2026-10-13
+updated: 2026-10-14
 ---
 
-# Today's Box · 今日の一箱
+# Today's Box
 
 Today's Box is a daily game: guess a game from its box. There's one box a day for everyone, and a new one opens at midnight Japan time. Play at tana.gamingjapanese.com/box/, or tap Today's Box on the home page. You don't need an account to play.
 
@@ -19,7 +19,7 @@ Any version of the right game counts. If today's box is the Japanese Super Famic
 
 ## Stamps, streaks and plates
 
-Each day you finish today's box earns a stamp on the month's stamp card, like a ラジオ体操 card. Days in a row make your streak. If you stamp every box in a month, that month's brass plate goes under your shelf for good, and visitors to your shelf see it too.
+Each day you finish today's box earns a stamp on the month's stamp card, like the stamp cards Japanese children collect for summer morning exercises. Days in a row make your streak. If you stamp every box in a month, that month's brass plate goes under your shelf for good, and visitors to your shelf see it too.
 
 Boxes from earlier days can still be played from their link, but they don't earn stamps or count toward your streak.
 
@@ -31,7 +31,7 @@ You can play every day without an account. Your stamps and streak are kept on th
 
 When you finish, you get a result to post, like this:
 
-- 棚 今日の一箱 No.12  3/6
+- Tana · Today's Box #12  3/6
 - 🟥🟥🟩⬛⬛⬛  🔥5
 
 It shows how many tries you needed and your streak, without giving the game away. Post on X opens a post with it ready, or tap Copy.
