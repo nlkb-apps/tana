@@ -4,7 +4,7 @@ slug: glossary
 section: Appendices
 order: A
 status: ready
-updated: 2026-10-12
+updated: 2026-10-14
 ---
 
 # Glossary
@@ -35,3 +35,9 @@ updated: 2026-10-12
 - Western only: never released in Japan
 - Physical in the West only: Japan only got a download, the West got a physical release
 - Verified: a copy with an approved photo of that copy
+- Wanted poster: a gap in the catalogue (no box art, no product code, no photo) that members can fill, with credit on the release
+- Box Battle: the daily vote between a game's Japanese box and its Western box
+- Hall of Boxes: the Box Battle winners that won most clearly
+- Shelf twin: a member whose shelf shares many exact copies with yours
+- Lone keeper: the only member on Tana with a particular edition
+- Circle: a group of members collecting one set of games together

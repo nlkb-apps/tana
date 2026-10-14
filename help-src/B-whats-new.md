@@ -9,6 +9,18 @@ updated: 2026-10-14
 
 # What's new
 
+## 2026-10-14: The Wanted board, Box Battle, Shelf twins and Circles
+
+Four new things under Community.
+
+The **Wanted board** posts the catalogue's gaps as posters: boxes with no art, editions with no product code, editions nobody has photographed. Members who own the copy see its poster first, and whoever fills it is credited on the release for good. See [The Wanted board](6-9-wanted-board.md).
+
+**Box Battle** puts a game's Japanese box against its Western box, one game a day. Pick the better box, then see how everyone voted. Wins add up to an all-time Japan vs the West score, a monthly cup (Famicom vs NES this October) and the Hall of Boxes. See [Box Battle](6-10-box-battle.md).
+
+**Shelf twins** finds the members whose shelves share the most exact copies with yours, and **lone keeper** marks the copies nobody else on Tana has. See [Shelf twins and lone keepers](6-11-shelf-twins.md).
+
+**Circles** are groups collecting a set together, such as every Disk System game or every Japanese Saturn shooter. Every member's shelf counts, the missing games become the circle's hunt list, and a circle that reaches its monthly goal earns a brass plate. See [Circles](6-12-circles.md).
+
 ## 2026-10-14: Menus and headings in English
 
 Every menu, heading and label in Tana is now in English first. Today's Box, My 9, the stamp cards, platform names and the share text all read in English, and where a Japanese name is worth knowing (My 9 is known in Japan as 私を構成する9本), it appears in small print underneath. Game titles still show their Japanese name for Japanese releases, as before, and the shelf mark 棚 stays in the logo.
