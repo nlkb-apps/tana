@@ -21,3 +21,20 @@ Under the letter there are two short lists made from Tana itself:
 Nobody gets the letter unless they say yes. You can say yes when you sign up, from the card that appears on your collection page, or in Account under The weekly letter. Every letter has an unsubscribe link that works in one click, and you can switch it off in Account any time.
 
 Replies go to Nico. The letter is sent through Resend, an email delivery service; see [Privacy and your data](9-3-privacy-and-data.md).
+
+## Writing it (editors)
+
+The letter is written on the letter desk (**Account → Letter desk**). The writing box works like a word processor:
+
+- **Text styles.** Normal text, a heading, a smaller heading or a quote. Bold, italic, underline and strikethrough.
+- **Fonts and sizes.** Georgia (the letter's own font), Helvetica, Trebuchet, Times or Courier, in Small, Normal, Large or Huge. These fonts are on almost every computer and phone, so the email looks the same for everyone.
+- **Colours.** A text colour and a highlight, from Tana's palette or any colour you pick.
+- **Lists, alignment and dividers.** Bulleted and numbered lists, left, centre or right, and a line across the page.
+- **Links.** Select some words, press the link button and paste the address.
+- **Pictures.** Press the picture button, or paste or drop a picture straight into the letter. Large photos are shrunk to 1,200 pixels before they're stored. Click a picture to make it small, medium or full width, line it up left or in the centre, or remove it.
+- **Box art.** The box button finds a game in the catalogue and puts its cover in the letter, linked to the game's page, with its title underneath.
+- **Your signature.** Write it once with **Your signature** (your name, a line about you, a small picture). The signature button then adds it wherever the cursor is.
+
+Undo and redo work as usual, and the clear button takes the formatting off whatever you've selected. The desk saves as you write. **Preview the email** shows exactly what members will get; **Send me a test** sends it to you first.
+
+Text you paste from other places keeps its basic formatting (bold, links, lists) but not its fonts' hidden extras, so the letter stays clean in every mail app.
