@@ -4,10 +4,14 @@ slug: whats-new
 section: Appendices
 order: B
 status: ready
-updated: 2026-10-15
+updated: 2026-10-19
 ---
 
 # What's new
+
+## 2026-10-19: Box Battle is now Cover Battle, with a closer look before you vote
+
+Box Battle is now called **Cover Battle**, so it's easier to tell apart from Today's Box. Tapping a cover no longer votes straight away: tap to choose it, then press **Vote for this cover**. The magnifier on each cover opens it large, with a switch to the other one. See [Cover Battle](6-10-box-battle.md).
 
 ## 2026-10-15: Faster search, and Today's Box understands English titles
 

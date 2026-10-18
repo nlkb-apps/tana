@@ -60,7 +60,7 @@ Welcome to the Tana help pages. Whether you're setting up your first shelf or tr
 - [6.7 Comments and discussion](6-7-comments.md)
 - [6.8 Today's Box](6-8-todays-box.md)
 - [6.9 The Wanted board](6-9-wanted-board.md)
-- [6.10 Box Battle](6-10-box-battle.md)
+- [6.10 Cover Battle](6-10-box-battle.md)
 - [6.11 Shelf twins and lone keepers](6-11-shelf-twins.md)
 - [6.12 Circles](6-12-circles.md)
 - [6.13 The weekly letter](6-13-weekly-letter.md)

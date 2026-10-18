@@ -354,7 +354,7 @@ async function main() {
   await buildProfiles();
   await buildMy9(platforms);
   await buildBox();
-  try { await buildBattle(); } catch (e) { console.warn('Box Battle page skipped:', e.message); }
+  try { await buildBattle(); } catch (e) { console.warn('Cover Battle page skipped:', e.message); }
   // The visit counter static pages load: one call to track(), no cookies (see the app's privacy page)
   if (SUPABASE_URL && ANON) await writeIfChanged(join(OUT, 't.js'), `(function(){try{var q=new URLSearchParams(location.search);fetch(${JSON.stringify(SUPABASE_URL + '/rest/v1/rpc/track')},{method:'POST',keepalive:true,headers:{apikey:${JSON.stringify(ANON)},'Content-Type':'application/json'},body:JSON.stringify({p_path:location.pathname,p_ref:document.referrer||null,p_src:q.get('src')||q.get('utm_source'),p_kind:'page'})}).catch(function(){})}catch(e){}})();\n`);
 
@@ -791,15 +791,15 @@ async function buildBox() {
   console.log(`Today's Box page${t ? ` (No. ${t.no})` : ''}${img ? ' with its mosaic' : ''}`);
 }
 
-// ---------- Box Battle (/battle/): the share link, with today's two boxes as its preview picture,
+// ---------- Cover Battle (/battle/): the share link, with today's two covers as its preview picture,
 // and /battle/week.png: the last seven results in one picture, for posting each week ----------
 function battleLanding(t) {
   const name = t && t.work ? (t.work.title_west || t.work.title_en) : '';
-  const title = t ? `Box Battle #${t.no}: ${name}, Japan's box or the West's? | Tana` : `Box Battle: Japan's box or the West's? | Tana`;
-  const desc = `One game a day, two boxes: the Japanese one and the Western one. Pick the better box, then see how everyone voted. Free, no account needed.`;
+  const title = t ? `Cover Battle #${t.no}: ${name}, Japan's cover or the West's? | Tana` : `Cover Battle: Japan's cover or the West's? | Tana`;
+  const desc = `One game a day, two covers: the Japanese one and the Western one. Choose the better cover, then see how everyone voted. Free, no account needed.`;
   return layout({ title, desc, canonical: `${SITE}/battle/`, ogImage: `${SITE}/battle/card.png`,
     body: `${goApp('/#/battle')}
-<section class="profile"><p class="crumb">A daily vote on Tana</p><h1>Box Battle</h1>
+<section class="profile"><p class="crumb">A daily vote on Tana</p><h1>Cover Battle</h1>
 <p class="lede">${esc(desc)}</p>
 <p class="actions"><a class="btn primary" href="${SITE}/#/battle">Vote in today's battle</a></p></section>` });
 }
@@ -812,7 +812,7 @@ function boxImg(d, x, y, mw, mh) {   // a box picture fitted into a space, stand
 const regPatch = (reg, x, y, s = 1) => { const c = reg === 'JP' ? '#B4452A' : reg === 'EU' ? '#2E6A4E' : '#2C4A7E';
   return `<rect x="${x}" y="${y}" width="${46 * s}" height="${28 * s}" rx="2" fill="#F4EFE4" stroke="${c}" stroke-width="${2.5 * s}"/><text x="${x + 23 * s}" y="${y + 20 * s}" text-anchor="middle" font-family="Inter" font-weight="600" font-size="${17 * s}" fill="${c}">${esc(reg)}</text>`; };
 function battleCardSvg(t, a, b) {
-  const W = 1200, H = 630, name = t && t.work ? (t.work.title_west || t.work.title_en) : 'Box Battle';
+  const W = 1200, H = 630, name = t && t.work ? (t.work.title_west || t.work.title_en) : 'Cover Battle';
   const lines = wrapWords(name, 18, 2);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
 <rect width="${W}" height="${H}" fill="#ECEBE6"/>
@@ -820,10 +820,10 @@ function battleCardSvg(t, a, b) {
 ${boxImg(a, 590, 90, 245, 420)}${boxImg(b, 875, 90, 245, 420)}
 ${t ? regPatch(t.jp.reg, 600, 520) + regPatch(t.w.reg, 1064, 520) : ''}
 <text x="855" y="544" text-anchor="middle" font-family="Inter" font-weight="600" font-size="20" fill="#C9A13B">VS</text>
-<text x="60" y="110" font-family="Inter" font-weight="600" font-size="18" letter-spacing="3" fill="#6B675E">BOX BATTLE${t ? ` · #${t.no}` : ''}</text>
+<text x="60" y="110" font-family="Inter" font-weight="600" font-size="18" letter-spacing="3" fill="#6B675E">COVER BATTLE${t ? ` · #${t.no}` : ''}</text>
 ${lines.map((l, k) => `<text x="60" y="${185 + k * 64}" font-family="Libre Caslon Text" font-weight="700" font-size="58" fill="#1D1B17">${esc(l)}</text>`).join('')}
-<text x="60" y="${185 + lines.length * 64 + 20}" font-family="Libre Caslon Text" font-weight="700" font-size="32" fill="#1D1B17">Japan's box or the West's?</text>
-<text x="60" y="${185 + lines.length * 64 + 66}" font-family="Inter" font-size="23" fill="#5D5A52">Pick the better box, then see how</text>
+<text x="60" y="${185 + lines.length * 64 + 20}" font-family="Libre Caslon Text" font-weight="700" font-size="32" fill="#1D1B17">Japan's cover or the West's?</text>
+<text x="60" y="${185 + lines.length * 64 + 66}" font-family="Inter" font-size="23" fill="#5D5A52">Choose the better cover, then see how</text>
 <text x="60" y="${185 + lines.length * 64 + 98}" font-family="Inter" font-size="23" fill="#5D5A52">everyone voted. A new pair every day.</text>
 <rect x="60" y="548" width="7" height="26" rx="1" fill="#B4452A"/><rect x="70" y="542" width="7" height="32" rx="1" fill="#2C4A7E"/><rect x="80" y="552" width="7" height="22" rx="1" fill="#2E6A4E"/>
 <text x="98" y="572" font-family="Libre Caslon Text" font-weight="700" font-size="26" fill="#1D1B17">Tana</text>
@@ -835,7 +835,7 @@ function battleWeekSvg(rows) {   // rows: [{no, title, jp, w, winner, a, b, jr, 
   const total = rows.reduce((o, r) => { if (r.winner === 'jp') o.jp++; else if (r.winner === 'w') o.w++; return o; }, { jp: 0, w: 0 });
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
 <rect width="${W}" height="${H}" fill="#ECEBE6"/>
-<text x="60" y="80" font-family="Inter" font-weight="600" font-size="18" letter-spacing="3" fill="#6B675E">BOX BATTLE · THE WEEK</text>
+<text x="60" y="80" font-family="Inter" font-weight="600" font-size="18" letter-spacing="3" fill="#6B675E">COVER BATTLE · THE WEEK</text>
 <text x="60" y="140" font-family="Libre Caslon Text" font-weight="700" font-size="50" fill="#1D1B17">Japan ${total.jp}, the West ${total.w}</text>
 ${rows.map((r, k) => { const x = 60 + k * cw, win = r.winner, n2 = r.jp + r.w, pj = n2 ? Math.round(100 * r.jp / n2) : 0;
   return `<g>
@@ -853,7 +853,7 @@ ${rows.map((r, k) => { const x = 60 + k * cw, win = r.winner, n2 = r.jp + r.w, p
 async function buildBattle() {
   let t = null, hall = null;
   if (!SAMPLE) {
-    t = await rpc('battle_today', {}).catch(e => { console.warn('Box Battle skipped:', e.message); return null; });
+    t = await rpc('battle_today', {}).catch(e => { console.warn('Cover Battle skipped:', e.message); return null; });
     hall = await rpc('battle_hall', { p_limit: 1 }).catch(() => null);
   }
   await mkdir(join(OUT, 'battle'), { recursive: true });
@@ -879,7 +879,7 @@ async function buildBattle() {
     }
     if (rows.length) await writeBinIfChanged(join(OUT, 'battle', 'week.png'), png(battleWeekSvg(rows)));
   }
-  console.log(`Box Battle page${t ? ` (#${t.no})` : ''}, ${recent.length} results in the week picture`);
+  console.log(`Cover Battle page${t ? ` (#${t.no})` : ''}, ${recent.length} results in the week picture`);
 }
 
 async function writeBinIfChanged(path, buf) {

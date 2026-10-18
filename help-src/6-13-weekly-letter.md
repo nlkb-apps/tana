@@ -13,8 +13,8 @@ The weekly letter is a short email from Nico, who runs Tana. It's written by han
 
 Under the letter there are two short lists made from Tana itself:
 
-- **This week on Tana.** New members, the week's Box Battle results, the hardest Today's Box, Wanted posters filled, the circles that grew.
-- **For you.** Lines from your own shelf only: Wanted posters for copies you own, what your shelf twin added, how your Box Battle votes went, games on your wantlist that other members have.
+- **This week on Tana.** New members, the week's Cover Battle results, the hardest Today's Box, Wanted posters filled, the circles that grew.
+- **For you.** Lines from your own shelf only: Wanted posters for copies you own, what your shelf twin added, how your Cover Battle votes went, games on your wantlist that other members have.
 
 ## Getting it, or not
 
